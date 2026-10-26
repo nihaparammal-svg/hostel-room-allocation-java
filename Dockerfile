@@ -10,6 +10,7 @@ WORKDIR /workspace
 COPY pom.xml .
 COPY mvnw .
 COPY mvnw.cmd .
+COPY .mvn .mvn
 
 # Copy source code and build production package
 COPY src src
