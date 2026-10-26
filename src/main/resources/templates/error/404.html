@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html-head('Page Not Found')}"></head>
+<body>
+
+    <header th:replace="~{fragments/layout :: navbar('')}"></header>
+
+    <main class="main-content">
+        <div class="container" style="max-width: 600px; text-align: center; padding-block: 4rem;">
+            
+            <div class="card" style="box-shadow: var(--shadow-md); padding: 3rem 2rem;">
+                <div style="font-size: 3.5rem; color: var(--purple-main); margin-bottom: 1rem;">&#128269;</div>
+                <h1 style="color: var(--primary-blue); font-size: 2rem; margin-bottom: 0.5rem;" th:text="${errorTitle != null ? errorTitle : '404 - Not Found'}">404 - Page Not Found</h1>
+                <p style="font-size: 1.05rem; margin-bottom: 1.5rem;" th:text="${errorMessage != null ? errorMessage : 'The requested college hostel page or record could not be found.'}">
+                    The requested page could not be found.
+                </p>
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <a th:href="@{/}" class="btn btn-primary">&#127968; Return to Home</a>
+                    <a th:href="@{/rooms}" class="btn btn-outline">Browse Rooms</a>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

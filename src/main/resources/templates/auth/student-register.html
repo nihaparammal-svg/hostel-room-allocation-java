@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html-head('Student Registration')}"></head>
+<body>
+
+    <header th:replace="~{fragments/layout :: navbar('register')}"></header>
+
+    <main class="main-content">
+        <div class="container" style="max-width: 680px;">
+            
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="card" style="box-shadow: var(--shadow-md); padding: 2.25rem;">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <div style="width: 56px; height: 56px; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--purple-main), var(--primary-accent)); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin: 0 auto 1rem;">
+                        &#128221;
+                    </div>
+                    <h1 style="color: var(--primary-blue); font-size: 1.7rem; margin-bottom: 0.35rem;">Student Registration</h1>
+                    <p style="font-size: 0.95rem; margin-bottom: 0;">Create your personal student hostel residency account.</p>
+                </div>
+
+                <!-- Registration Form (Pure HTML POST) -->
+                <form th:action="@{/auth/register}" th:object="${student}" method="post">
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="fullName" class="form-label">Full Name *</label>
+                            <input type="text" id="fullName" th:field="*{fullName}" class="form-control" placeholder="e.g. John Doe" required>
+                            <div th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}" class="form-error">Error</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="studentId" class="form-label">Student ID *</label>
+                            <input type="text" id="studentId" th:field="*{studentId}" class="form-control" placeholder="e.g. STU2024099" required>
+                            <div th:if="${#fields.hasErrors('studentId')}" th:errors="*{studentId}" class="form-error">Error</div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="email" class="form-label">College Email Address *</label>
+                            <input type="email" id="email" th:field="*{email}" class="form-control" placeholder="e.g. student@hostel.edu" required>
+                            <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="form-error">Error</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone" class="form-label">Mobile Number *</label>
+                            <input type="tel" id="phone" th:field="*{phone}" class="form-control" placeholder="e.g. +1-555-0188" required>
+                            <div th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="form-error">Error</div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="department" class="form-label">Academic Department *</label>
+                            <select id="department" th:field="*{department}" class="form-select" required>
+                                <option value="">-- Select Department --</option>
+                                <option value="Computer Science">Computer Science &amp; Engineering</option>
+                                <option value="Information Technology">Information Technology</option>
+                                <option value="Mechanical Engineering">Mechanical Engineering</option>
+                                <option value="Electrical Engineering">Electrical &amp; Electronics</option>
+                                <option value="Civil Engineering">Civil Engineering</option>
+                                <option value="Business Administration">Business Administration</option>
+                                <option value="Biotechnology">Biotechnology</option>
+                            </select>
+                            <div th:if="${#fields.hasErrors('department')}" th:errors="*{department}" class="form-error">Error</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="yearOfStudy" class="form-label">Year of Study *</label>
+                            <select id="yearOfStudy" th:field="*{yearOfStudy}" class="form-select" required>
+                                <option value="">-- Select Year --</option>
+                                <option value="1st Year">1st Year (Freshman)</option>
+                                <option value="2nd Year">2nd Year (Sophomore)</option>
+                                <option value="3rd Year">3rd Year (Junior)</option>
+                                <option value="4th Year">4th Year (Senior)</option>
+                                <option value="Postgraduate">Postgraduate</option>
+                            </select>
+                            <div th:if="${#fields.hasErrors('yearOfStudy')}" th:errors="*{yearOfStudy}" class="form-error">Error</div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="password" class="form-label">Password * (Min 6 chars)</label>
+                            <input type="password" id="password" th:field="*{password}" class="form-control" placeholder="Create strong password" required minlength="6">
+                            <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="form-error">Error</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirmPassword" class="form-label">Confirm Password *</label>
+                            <input type="password" id="confirmPassword" th:field="*{confirmPassword}" class="form-control" placeholder="Repeat your password" required minlength="6">
+                            <div th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}" class="form-error">Error</div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-purple btn-lg" style="width: 100%; margin-top: 1rem;">
+                        &#10004; Complete Registration
+                    </button>
+                </form>
+
+                <div style="margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle); text-align: center;">
+                    <p style="font-size: 0.9rem; margin-bottom: 0;">
+                        Already registered? 
+                        <a th:href="@{/auth/student-login}" style="font-weight: 700; color: var(--primary-accent);">Sign in here &rarr;</a>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html-head('Room Allocation & Bed Management')}"></head>
+<body>
+
+    <header th:replace="~{fragments/layout :: navbar('admin-allocations')}"></header>
+
+    <main class="main-content">
+        <div class="container">
+            
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <h1 style="color: var(--primary-blue); font-size: 1.85rem; margin-bottom: 0.25rem;">Hostel Room &amp; Bed Allocations</h1>
+                <p style="font-size: 0.95rem; margin-bottom: 0;">Assign vacant beds to approved applicants and manage student checkouts/vacancies.</p>
+            </div>
+
+            <!-- Allocate Bed Form Card -->
+            <div class="card" style="margin-bottom: 2rem; border-top: 4px solid var(--primary-accent);">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">&#128716; Allocate Room Bed to Approved Student</h2>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0;">
+                            Only students with approved applications who do not hold an active room allocation are listed.
+                        </p>
+                    </div>
+                </div>
+
+                <div th:if="${#lists.isEmpty(approvedApplications)}" class="alert alert-info" style="margin-bottom: 0;">
+                    <strong>&#8505; No Pending Approved Allocations: </strong>
+                    There are currently no approved applicants awaiting room assignment. Check 
+                    <a th:href="@{/admin/applications}" style="text-decoration: underline; font-weight: 700;">Applications</a> to review pending submissions.
+                </div>
+
+                <form th:unless="${#lists.isEmpty(approvedApplications)}" 
+                      th:action="@{/admin/allocations/allocate}" 
+                      th:object="${allocationDto}" 
+                      method="post">
+                    
+                    <div class="form-grid">
+                        <!-- Approved Student Selection -->
+                        <div class="form-group">
+                            <label for="studentSelect" class="form-label">Approved Student *</label>
+                            <select id="studentSelect" name="userId" class="form-select" required>
+                                <option value="">-- Select Approved Student --</option>
+                                <option th:each="app : ${approvedApplications}" 
+                                        th:value="${app.user.id}" 
+                                        th:selected="${allocationDto.userId != null and allocationDto.userId == app.user.id}"
+                                        th:text="${app.user.fullName} + ' (' + ${app.user.studentId} + ' - ' + ${app.user.department} + ') [App #' + ${app.id} + ']'">
+                                    Student Name
+                                </option>
+                            </select>
+                            <input type="hidden" name="applicationId" th:value="${allocationDto.applicationId}">
+                        </div>
+
+                        <!-- Room Selection (Displays Live Available Beds) -->
+                        <div class="form-group">
+                            <label for="roomSelect" class="form-label">Available Room *</label>
+                            <select id="roomSelect" th:field="*{roomId}" class="form-select" required>
+                                <option value="">-- Select Available Room --</option>
+                                <option th:each="r : ${availableRooms}" 
+                                        th:value="${r.id}" 
+                                        th:text="${r.block.blockName} + ' - Room ' + ${r.roomNumber} + ' (' + ${r.roomType} + ', ' + ${r.availableBeds} + ' beds free, $' + ${r.monthlyFee} + ')'">
+                                    Room 101
+                                </option>
+                            </select>
+                            <div class="form-hint">Only rooms with at least 1 free bed are selectable.</div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <!-- Bed Number Specification -->
+                        <div class="form-group">
+                            <label for="bedNumber" class="form-label">Bed Identifier / Number *</label>
+                            <input type="text" id="bedNumber" th:field="*{bedNumber}" class="form-control" placeholder="e.g. Bed-1, Bed-2, Bed-A" required>
+                            <div class="form-hint">Must be distinct per room to avoid assigning the same bed.</div>
+                        </div>
+
+                        <!-- Optional Remarks -->
+                        <div class="form-group">
+                            <label for="remarks" class="form-label">Allocation Remarks (Optional)</label>
+                            <input type="text" id="remarks" th:field="*{remarks}" class="form-control" placeholder="e.g. Regular semester allocation, keys issued">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="margin-top: 0.5rem;">
+                        &#10004; Confirm Room Allocation
+                    </button>
+                </form>
+            </div>
+
+            <!-- Allocations Directory Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">&#128340; All Bed Allocations (<span th:text="${#lists.size(allocations)}">0</span>)</h2>
+                    
+                    <!-- Search / Status Filter Form -->
+                    <form th:action="@{/admin/allocations}" method="get" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <input type="text" name="keyword" th:value="${searchKeyword}" placeholder="Search student, room..." class="form-control" style="width: 200px; padding: 0.35rem 0.65rem; font-size: 0.85rem;">
+                        <select name="status" class="form-select" style="width: 140px; padding: 0.35rem 0.65rem; font-size: 0.85rem;">
+                            <option value="">All Statuses</option>
+                            <option value="ACTIVE" th:selected="${selectedStatus == 'ACTIVE'}">Active</option>
+                            <option value="VACATED" th:selected="${selectedStatus == 'VACATED'}">Vacated</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary btn-sm">&#128269; Filter</button>
+                        <a th:href="@{/admin/allocations}" class="btn btn-outline btn-sm">&#8635;</a>
+                    </form>
+                </div>
+
+                <div th:if="${#lists.isEmpty(allocations)}" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                    <p style="margin-bottom: 0;">No allocation records found.</p>
+                </div>
+
+                <div th:unless="${#lists.isEmpty(allocations)}" class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Alloc ID</th>
+                                <th>Student</th>
+                                <th>Hostel Block</th>
+                                <th>Room &amp; Bed</th>
+                                <th>Allocated Date</th>
+                                <th>Vacated Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="alloc : ${allocations}">
+                                <td><strong th:text="'#' + ${alloc.id}">#1</strong></td>
+                                <td>
+                                    <strong style="color: var(--primary-blue);" th:text="${alloc.user.fullName}">Student Name</strong><br>
+                                    <small style="color: var(--purple-main); font-weight: 600;" th:text="${alloc.user.studentId}">STU001</small><br>
+                                    <small style="color: var(--text-muted);" th:text="${alloc.user.department}">Department</small>
+                                </td>
+                                <td th:text="${alloc.room.block.blockName}">Block A</td>
+                                <td>
+                                    <strong th:text="'Room ' + ${alloc.room.roomNumber}">Room 101</strong><br>
+                                    <span class="badge badge-waitlisted" th:text="${alloc.bedNumber}">Bed-1</span>
+                                </td>
+                                <td th:text="${#temporals.format(alloc.allocatedAt, 'dd MMM yyyy')}">Date</td>
+                                <td th:text="${alloc.vacatedAt != null ? #temporals.format(alloc.vacatedAt, 'dd MMM yyyy') : '-'}">-</td>
+                                <td>
+                                    <span class="badge" 
+                                          th:classappend="${alloc.status == 'ACTIVE' ? 'badge-approved' : 'badge-vacated'}"
+                                          th:text="${alloc.status}">
+                                        ACTIVE
+                                    </span>
+                                </td>
+                                <td>
+                                    <!-- Vacate Bed Form (Pure HTML POST) -->
+                                    <form th:if="${alloc.status == 'ACTIVE'}" 
+                                          th:action="@{/admin/allocations/vacate/{id}(id=${alloc.id})}" 
+                                          method="post">
+                                        <button type="submit" class="btn btn-outline-primary btn-sm" style="color: #dc2626; border-color: #fca5a5;">
+                                            &#128682; Vacate Bed
+                                        </button>
+                                    </form>
+                                    <span th:unless="${alloc.status == 'ACTIVE'}" style="color: var(--text-muted); font-size: 0.85rem;">
+                                        Checked Out
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

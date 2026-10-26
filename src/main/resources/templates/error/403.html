@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html-head('Access Denied')}"></head>
+<body>
+
+    <header th:replace="~{fragments/layout :: navbar('')}"></header>
+
+    <main class="main-content">
+        <div class="container" style="max-width: 600px; text-align: center; padding-block: 4rem;">
+            
+            <div class="card" style="box-shadow: var(--shadow-md); padding: 3rem 2rem;">
+                <div style="font-size: 3.5rem; color: #dc2626; margin-bottom: 1rem;">&#128683;</div>
+                <h1 style="color: var(--primary-blue); font-size: 2rem; margin-bottom: 0.5rem;">403 - Access Denied</h1>
+                <p style="font-size: 1.05rem; margin-bottom: 1.5rem;">
+                    You do not have authorization to view this administrative resource. 
+                    Students and administrators have strictly isolated access permissions.
+                </p>
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <a th:href="@{/}" class="btn btn-primary">&#127968; Return to Home</a>
+                    <a th:href="@{/auth/student-login}" class="btn btn-outline">Student Login</a>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html-head('Contact Administration')}"></head>
+<body>
+
+    <header th:replace="~{fragments/layout :: navbar('contact')}"></header>
+
+    <main class="main-content">
+        <div class="container">
+            
+            <div style="max-width: 900px; margin: 0 auto;">
+                <div class="card" style="margin-bottom: 2rem;">
+                    <h1 style="color: var(--primary-blue); font-size: 2rem; margin-bottom: 1rem;">Hostel Warden &amp; Administrative Directory</h1>
+                    <p style="font-size: 1.05rem;">
+                        Have questions about hostel allocation, vacancy registration, or room maintenance? Reach out to our dedicated campus residency administration.
+                    </p>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                    <div class="card">
+                        <h3 style="color: var(--primary-blue); margin-bottom: 0.5rem;">Chief Warden Office</h3>
+                        <p style="font-size: 0.875rem; margin-bottom: 0.5rem;"><strong>Warden:</strong> Dr. Robert Sterling</p>
+                        <p style="font-size: 0.875rem; margin-bottom: 0.5rem;"><strong>Email:</strong> admin@hostel.edu</p>
+                        <p style="font-size: 0.875rem; margin-bottom: 0.5rem;"><strong>Office:</strong> Administration Building, Room 104</p>
+                        <p style="font-size: 0.875rem; margin-bottom: 0;"><strong>Hours:</strong> Mon - Fri: 9:00 AM - 5:00 PM</p>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="color: var(--primary-blue); margin-bottom: 0.5rem;">Boys Residency Warden</h3>
+                        <p style="font-size: 0.875rem; margin-bottom: 0.5rem;"><strong>Warden:</strong> Prof. Michael Vance</p>
+                        <p style="font-size: 0.875rem; margin-bottom: 0.5rem;"><strong>Email:</strong> warden-boys@hostel.edu</p>
+                        <p style="font-size: 0.875rem; margin-bottom: 0.5rem;"><strong>Office:</strong> Block A, Ground Floor Desk</p>
+                        <p style="font-size: 0.875rem; margin-bottom: 0;"><strong>Phone:</strong> +1 (555) 0101</p>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="color: var(--primary-blue); margin-bottom: 0.5rem;">Girls Residency Warden</h3>
+                        <p style="font-size: 0.875rem; margin-bottom: 0.5rem;"><strong>Warden:</strong> Dr. Eleanor Martinez</p>
+                        <p style="font-size: 0.875rem; margin-bottom: 0.5rem;"><strong>Email:</strong> warden-girls@hostel.edu</p>
+                        <p style="font-size: 0.875rem; margin-bottom: 0.5rem;"><strong>Office:</strong> Block B, Administrative Wing</p>
+                        <p style="font-size: 0.875rem; margin-bottom: 0;"><strong>Phone:</strong> +1 (555) 0102</p>
+                    </div>
+                </div>
+
+                <div class="card" style="background-color: var(--primary-subtle); border-color: var(--primary-light);">
+                    <h3 style="color: var(--primary-blue); margin-bottom: 0.5rem;">&#128680; Emergency Campus Helpline</h3>
+                    <p style="font-size: 0.95rem; margin-bottom: 0.5rem;">For medical emergencies, late night incidents, or security assistance:</p>
+                    <p style="font-size: 1.25rem; font-weight: 800; color: #dc2626; margin-bottom: 0;">24/7 Security Hotline: +1 (555) 0911</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

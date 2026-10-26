@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html-head('Home')}"></head>
+<body>
+
+    <header th:replace="~{fragments/layout :: navbar('home')}"></header>
+
+    <main class="main-content">
+        <div class="container">
+            
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <!-- Hero Section -->
+            <section class="hero">
+                <span class="hero-badge">&#127979; Official College Residency Portal</span>
+                <h1 class="hero-title">Hostel Room Allocation and Vacancy Registration System</h1>
+                <p class="hero-subtitle">
+                    A streamlined, transparent residential portal designed for college students. 
+                    Search room availability across hostel blocks, submit applications, and track bed allocations in real time.
+                </p>
+                <div class="hero-actions">
+                    <a th:href="@{/rooms}" class="btn btn-primary btn-lg">
+                        <span>&#128269; View Available Rooms</span>
+                    </a>
+                    <a th:href="@{/auth/register}" class="btn btn-purple btn-lg">
+                        <span>&#128221; Student Registration</span>
+                    </a>
+                    <a th:href="@{/auth/student-login}" class="btn btn-outline-primary btn-lg">
+                        <span>&#128272; Student Portal</span>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Live Database Statistics Section -->
+            <section style="margin-bottom: 2.5rem;">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <h2 style="font-size: 1.6rem; color: var(--primary-blue);">Live Hostel Capacity Overview</h2>
+                    <p style="font-size: 0.95rem;">Real-time bed availability dynamically calculated from the MySQL database.</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon stat-icon-blue">&#127960;</div>
+                        <div>
+                            <div class="stat-value" th:text="${totalRooms}">0</div>
+                            <div class="stat-label">Total Rooms</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon stat-icon-purple">&#128716;</div>
+                        <div>
+                            <div class="stat-value" th:text="${totalCapacity}">0</div>
+                            <div class="stat-label">Total Bed Capacity</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon stat-icon-green">&#10004;</div>
+                        <div>
+                            <div class="stat-value" th:text="${availableBeds}">0</div>
+                            <div class="stat-label">Available Vacant Beds</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon stat-icon-amber">&#128101;</div>
+                        <div>
+                            <div class="stat-value" th:text="${occupiedBeds}">0</div>
+                            <div class="stat-label">Occupied Beds</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Hostel Blocks Overview -->
+            <section style="margin-bottom: 2.5rem;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">&#127970; Campus Hostel Blocks</h2>
+                        <a th:href="@{/rooms}" class="btn btn-outline-primary btn-sm">Browse All Rooms &rarr;</a>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+                        <div th:each="block : ${blocks}" style="background-color: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                <h3 style="font-size: 1.1rem; color: var(--primary-blue);" th:text="${block.blockName}">Block Name</h3>
+                                <span class="badge" 
+                                      th:classappend="${block.genderType == 'MALE' ? 'badge-approved' : (block.genderType == 'FEMALE' ? 'badge-waitlisted' : 'badge-pending')}"
+                                      th:text="${block.genderType}">GENDER</span>
+                            </div>
+                            <p style="font-size: 0.875rem; margin-bottom: 0.75rem;" th:text="${block.description}">Block description</p>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">
+                                <span>Floors: <strong th:text="${block.totalFloors}">4</strong></span>
+                                <a th:href="@{/rooms(blockId=${block.id})}" style="color: var(--primary-accent);">View Rooms &rarr;</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features & How It Works -->
+            <section style="margin-bottom: 2.5rem;">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <h2 style="font-size: 1.6rem; color: var(--primary-blue);">How The Allocation Process Works</h2>
+                    <p style="font-size: 0.95rem;">Transparent 4-step workflow from student registration to room keys handover.</p>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem;">
+                    <div class="card" style="text-align: center;">
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background-color: var(--primary-light); color: var(--primary-accent); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-weight: 800; font-size: 1.2rem;">1</div>
+                        <h4 style="color: var(--primary-blue); margin-bottom: 0.5rem;">Create Account</h4>
+                        <p style="font-size: 0.875rem;">Register with your college student ID and secure your password.</p>
+                    </div>
+
+                    <div class="card" style="text-align: center;">
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background-color: var(--purple-light); color: var(--purple-main); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-weight: 800; font-size: 1.2rem;">2</div>
+                        <h4 style="color: var(--primary-blue); margin-bottom: 0.5rem;">Explore &amp; Apply</h4>
+                        <p style="font-size: 0.875rem;">Browse available rooms and submit your block &amp; room type preferences.</p>
+                    </div>
+
+                    <div class="card" style="text-align: center;">
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background-color: var(--status-pending-bg); color: var(--status-pending-text); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-weight: 800; font-size: 1.2rem;">3</div>
+                        <h4 style="color: var(--primary-blue); margin-bottom: 0.5rem;">Warden Review</h4>
+                        <p style="font-size: 0.875rem;">Administration verifies your eligibility, department, and approves allocation.</p>
+                    </div>
+
+                    <div class="card" style="text-align: center;">
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background-color: var(--status-approved-bg); color: var(--status-approved-text); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-weight: 800; font-size: 1.2rem;">4</div>
+                        <h4 style="color: var(--primary-blue); margin-bottom: 0.5rem;">Bed Allocation</h4>
+                        <p style="font-size: 0.875rem;">Receive your designated room &amp; bed number on your personalized student dashboard.</p>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

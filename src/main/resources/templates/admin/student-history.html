@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html-head('Student History')}"></head>
+<body>
+
+    <header th:replace="~{fragments/layout :: navbar('admin-students')}"></header>
+
+    <main class="main-content">
+        <div class="container">
+            
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div>
+                    <h1 style="color: var(--primary-blue); font-size: 1.85rem; margin-bottom: 0.25rem;">Student Residency Dossier</h1>
+                    <p style="font-size: 0.95rem; margin-bottom: 0;">Comprehensive record of applications and room allocations for <strong th:text="${student.fullName}">Student</strong>.</p>
+                </div>
+                <a th:href="@{/admin/students}" class="btn btn-outline">&larr; Back to Student Directory</a>
+            </div>
+
+            <!-- Student Profile Summary Card -->
+            <div class="card" style="margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h2 style="font-size: 1.35rem; color: var(--primary-blue);" th:text="${student.fullName}">Alex Morgan</h2>
+                        <span style="font-weight: 700; color: var(--purple-main);" th:text="${student.studentId}">STU2024001</span> | 
+                        <span th:text="${student.department}">Computer Science</span> (<span th:text="${student.yearOfStudy}">3rd Year</span>) | 
+                        <span>Email: <span th:text="${student.email}">email</span></span>
+                    </div>
+                    <span class="badge" th:classappend="${student.active ? 'badge-approved' : 'badge-rejected'}" 
+                          th:text="${student.active ? 'ACTIVE ACCOUNT' : 'DEACTIVATED'}">ACTIVE</span>
+                </div>
+            </div>
+
+            <!-- Current Allocation Card -->
+            <div class="card" style="margin-bottom: 2rem; border-left: 4px solid var(--primary-accent);">
+                <div class="card-header">
+                    <h3 class="card-title">&#128716; Current Active Bed Allocation</h3>
+                </div>
+
+                <div th:if="${activeAllocation == null}" style="padding: 1rem; color: var(--text-muted);">
+                    No currently active room allocation on record for this student.
+                </div>
+
+                <div th:if="${activeAllocation != null}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div><strong>Hostel Block:</strong> <span th:text="${activeAllocation.room.block.blockName}">Block A</span></div>
+                    <div><strong>Room Number:</strong> <span th:text="'Room ' + ${activeAllocation.room.roomNumber}">Room 101</span></div>
+                    <div><strong>Bed Number:</strong> <span class="badge badge-approved" th:text="${activeAllocation.bedNumber}">Bed-1</span></div>
+                    <div><strong>Monthly Fee:</strong> <span th:text="'$' + ${activeAllocation.room.monthlyFee}">$4500</span></div>
+                    <div><strong>Allocated Date:</strong> <span th:text="${#temporals.format(activeAllocation.allocatedAt, 'dd MMM yyyy')}">Date</span></div>
+                </div>
+            </div>
+
+            <!-- Applications History -->
+            <div class="card" style="margin-bottom: 2rem;">
+                <div class="card-header">
+                    <h3 class="card-title">&#128221; Application History</h3>
+                </div>
+
+                <div th:if="${#lists.isEmpty(applications)}" style="padding: 1.5rem; text-align: center; color: var(--text-muted);">
+                    No applications submitted yet.
+                </div>
+
+                <div th:unless="${#lists.isEmpty(applications)}" class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>App ID</th>
+                                <th>Preferred Block</th>
+                                <th>Room Type</th>
+                                <th>Special Notes</th>
+                                <th>Status</th>
+                                <th>Applied Date</th>
+                                <th>Admin Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="app : ${applications}">
+                                <td><strong th:text="'#' + ${app.id}">#1</strong></td>
+                                <td th:text="${app.preferredBlock != null ? app.preferredBlock.blockName : 'Any'}">Block A</td>
+                                <td th:text="${app.preferredRoomType}">Double</td>
+                                <td th:text="${app.specialRequests != null ? app.specialRequests : '-'}">-</td>
+                                <td>
+                                    <span class="badge" 
+                                          th:classappend="${app.status == 'APPROVED' ? 'badge-approved' : (app.status == 'PENDING' ? 'badge-pending' : (app.status == 'WAITLISTED' ? 'badge-waitlisted' : 'badge-rejected'))}"
+                                          th:text="${app.status}">
+                                        STATUS
+                                    </span>
+                                </td>
+                                <td th:text="${#temporals.format(app.appliedAt, 'dd MMM yyyy')}">Date</td>
+                                <td th:text="${app.adminRemarks != null ? app.adminRemarks : '-'}">Remarks</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Allocation History -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">&#128340; Bed Allocation History</h3>
+                </div>
+
+                <div th:if="${#lists.isEmpty(allocations)}" style="padding: 1.5rem; text-align: center; color: var(--text-muted);">
+                    No allocations on record.
+                </div>
+
+                <div th:unless="${#lists.isEmpty(allocations)}" class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Alloc ID</th>
+                                <th>Block &amp; Room</th>
+                                <th>Bed Number</th>
+                                <th>Allocated Date</th>
+                                <th>Vacated Date</th>
+                                <th>Status</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="alloc : ${allocations}">
+                                <td><strong th:text="'#' + ${alloc.id}">#1</strong></td>
+                                <td th:text="${alloc.room.block.blockName} + ' - Room ' + ${alloc.room.roomNumber}">Room 101</td>
+                                <td><strong th:text="${alloc.bedNumber}">Bed-1</strong></td>
+                                <td th:text="${#temporals.format(alloc.allocatedAt, 'dd MMM yyyy')}">Date</td>
+                                <td th:text="${alloc.vacatedAt != null ? #temporals.format(alloc.vacatedAt, 'dd MMM yyyy') : 'Current'}">Current</td>
+                                <td>
+                                    <span class="badge" 
+                                          th:classappend="${alloc.status == 'ACTIVE' ? 'badge-approved' : 'badge-vacated'}"
+                                          th:text="${alloc.status}">
+                                        ACTIVE
+                                    </span>
+                                </td>
+                                <td th:text="${alloc.remarks}">Remarks</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

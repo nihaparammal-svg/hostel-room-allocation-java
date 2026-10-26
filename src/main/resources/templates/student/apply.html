@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html-head('Apply for Hostel')}"></head>
+<body>
+
+    <header th:replace="~{fragments/layout :: navbar('apply')}"></header>
+
+    <main class="main-content">
+        <div class="container" style="max-width: 720px;">
+            
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <!-- Existing Allocation Warning -->
+            <div th:if="${alreadyAllocated}" class="alert alert-warning">
+                <strong>&#9888; Active Room Allocation Found: </strong>
+                You already hold an active hostel room. You cannot submit a duplicate application until your current allocation is vacated.
+            </div>
+
+            <!-- Existing Active Application Warning -->
+            <div th:if="${activeApplication != null and !alreadyAllocated}" class="alert alert-info">
+                <strong>&#8505; Existing Application in Progress: </strong>
+                You already have Application #<span th:text="${activeApplication.id}">1</span> currently marked as 
+                <strong th:text="${activeApplication.status}">PENDING</strong>.
+                <a th:href="@{/student/my-application}" style="text-decoration: underline; font-weight: 700; margin-left: 0.5rem;">Track Status &rarr;</a>
+            </div>
+
+            <div class="card" style="box-shadow: var(--shadow-md); padding: 2.25rem;">
+                <div class="card-header" style="margin-bottom: 1.5rem;">
+                    <div>
+                        <h1 class="card-title" style="font-size: 1.6rem;">Hostel Room Application</h1>
+                        <p style="font-size: 0.9rem; margin-bottom: 0;">Submit your preferences for college hostel room and bed allocation.</p>
+                    </div>
+                    <span class="badge badge-waitlisted">Academic Year 2026</span>
+                </div>
+
+                <!-- Verified Student Details Banner (Readonly verification) -->
+                <div style="background-color: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem 1.25rem; margin-bottom: 1.75rem;">
+                    <div style="font-size: 0.825rem; font-weight: 700; color: var(--purple-main); text-transform: uppercase; margin-bottom: 0.5rem;">
+                        Verified Student Profile
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; font-size: 0.9rem;">
+                        <div><strong>Name:</strong> <span th:text="${student.fullName}">Alex Morgan</span></div>
+                        <div><strong>Student ID:</strong> <span th:text="${student.studentId}">STU2024001</span></div>
+                        <div><strong>Department:</strong> <span th:text="${student.department}">Computer Science</span></div>
+                        <div><strong>Year:</strong> <span th:text="${student.yearOfStudy}">3rd Year</span></div>
+                    </div>
+                </div>
+
+                <!-- Application Form -->
+                <form th:action="@{/student/apply}" th:object="${applicationDto}" method="post">
+                    
+                    <div class="form-group">
+                        <label for="preferredBlockId" class="form-label">Preferred Hostel Block *</label>
+                        <select id="preferredBlockId" th:field="*{preferredBlockId}" class="form-select" required th:disabled="${alreadyAllocated or activeApplication != null}">
+                            <option value="">-- Choose Preferred Hostel Block --</option>
+                            <option th:each="block : ${blocks}" 
+                                    th:value="${block.id}" 
+                                    th:text="${block.blockName} + ' (' + ${block.genderType} + ')'">
+                                Block Name
+                            </option>
+                        </select>
+                        <div th:if="${#fields.hasErrors('preferredBlockId')}" th:errors="*{preferredBlockId}" class="form-error">Error</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="preferredRoomType" class="form-label">Preferred Room Type *</label>
+                        <select id="preferredRoomType" th:field="*{preferredRoomType}" class="form-select" required th:disabled="${alreadyAllocated or activeApplication != null}">
+                            <option value="">-- Choose Room Configuration --</option>
+                            <option value="Single">Single Occupancy (1 Bed - AC/Attached Bath)</option>
+                            <option value="Double">Double Sharing (2 Beds - Standard)</option>
+                            <option value="Triple">Triple Sharing (3 Beds - Economy)</option>
+                            <option value="Dormitory">Dormitory (4+ Beds)</option>
+                        </select>
+                        <div class="form-hint">Note: Final room type assignment depends on bed availability upon warden approval.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="specialRequests" class="form-label">Special Requests / Medical Notes (Optional)</label>
+                        <textarea id="specialRequests" th:field="*{specialRequests}" class="form-control" rows="3" placeholder="e.g. Ground floor preference due to mobility, quiet study room, dietary requests..." th:disabled="${alreadyAllocated or activeApplication != null}"></textarea>
+                    </div>
+
+                    <div style="margin-top: 1.5rem; display: flex; gap: 1rem; align-items: center;">
+                        <button type="submit" class="btn btn-primary btn-lg" style="flex: 1;" th:disabled="${alreadyAllocated or activeApplication != null}">
+                            &#10004; Submit Application
+                        </button>
+                        <a th:href="@{/student/dashboard}" class="btn btn-outline">Cancel</a>
+                    </div>
+                </form>
+
+            </div>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

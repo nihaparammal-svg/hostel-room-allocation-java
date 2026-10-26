@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Hostel Management System",
+            "request": "launch",
+            "mainClass": "com.college.hostel.HostelManagementApplication",
+            "projectName": "hostel-management-system",
+            "env": {
+                "SPRING_PROFILES_ACTIVE": "dev"
+            }
+        }
+    ]
+}

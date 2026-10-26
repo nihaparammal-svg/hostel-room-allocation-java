@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html-head('Application Management')}"></head>
+<body>
+
+    <header th:replace="~{fragments/layout :: navbar('admin-apps')}"></header>
+
+    <main class="main-content">
+        <div class="container">
+            
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h1 style="color: var(--primary-blue); font-size: 1.85rem; margin-bottom: 0.25rem;">Hostel Applications Review</h1>
+                    <p style="font-size: 0.95rem; margin-bottom: 0;">Review student applications, verify credentials, and approve allocations.</p>
+                </div>
+            </div>
+
+            <!-- Filter & Search Form (Pure HTTP GET) -->
+            <form th:action="@{/admin/applications}" method="get" class="filter-bar">
+                <div style="flex: 2; min-width: 220px;">
+                    <label for="keyword" class="form-label">Search Student</label>
+                    <input type="text" id="keyword" name="keyword" th:value="${searchKeyword}" class="form-control" placeholder="Search by name, student ID, email...">
+                </div>
+
+                <div style="flex: 1; min-width: 150px;">
+                    <label for="status" class="form-label">Application Status</label>
+                    <select id="status" name="status" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option value="PENDING" th:selected="${selectedStatus == 'PENDING'}">Pending</option>
+                        <option value="APPROVED" th:selected="${selectedStatus == 'APPROVED'}">Approved</option>
+                        <option value="WAITLISTED" th:selected="${selectedStatus == 'WAITLISTED'}">Waitlisted</option>
+                        <option value="REJECTED" th:selected="${selectedStatus == 'REJECTED'}">Rejected</option>
+                    </select>
+                </div>
+
+                <div style="flex: 1; min-width: 180px;">
+                    <label for="department" class="form-label">Department</label>
+                    <select id="department" name="department" class="form-select">
+                        <option value="">All Departments</option>
+                        <option value="Computer Science" th:selected="${selectedDepartment == 'Computer Science'}">Computer Science</option>
+                        <option value="Information Technology" th:selected="${selectedDepartment == 'Information Technology'}">Information Technology</option>
+                        <option value="Mechanical Engineering" th:selected="${selectedDepartment == 'Mechanical Engineering'}">Mechanical Engineering</option>
+                        <option value="Electrical Engineering" th:selected="${selectedDepartment == 'Electrical Engineering'}">Electrical Engineering</option>
+                        <option value="Civil Engineering" th:selected="${selectedDepartment == 'Civil Engineering'}">Civil Engineering</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 0.5rem;">
+                    <button type="submit" class="btn btn-primary">&#128269; Filter</button>
+                    <a th:href="@{/admin/applications}" class="btn btn-outline">&#8635; Reset</a>
+                </div>
+            </form>
+
+            <!-- Applications List -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">&#128221; Submitted Applications (<span th:text="${#lists.size(applications)}">0</span>)</h2>
+                </div>
+
+                <div th:if="${#lists.isEmpty(applications)}" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                    <p style="margin-bottom: 0;">No applications found matching the search criteria.</p>
+                </div>
+
+                <div th:unless="${#lists.isEmpty(applications)}" class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>App ID</th>
+                                <th>Student Details</th>
+                                <th>Department &amp; Year</th>
+                                <th>Preferences</th>
+                                <th>Special Notes</th>
+                                <th>Applied Date</th>
+                                <th>Status</th>
+                                <th>Remarks &amp; Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="app : ${applications}">
+                                <td><strong th:text="'#' + ${app.id}">#1</strong></td>
+                                <td>
+                                    <strong style="color: var(--primary-blue);" th:text="${app.user.fullName}">Alex Morgan</strong><br>
+                                    <small style="color: var(--purple-main); font-weight: 600;" th:text="${app.user.studentId}">STU001</small><br>
+                                    <small style="color: var(--text-muted);" th:text="${app.user.email}">alex@hostel.edu</small>
+                                </td>
+                                <td>
+                                    <span th:text="${app.user.department}">Computer Science</span><br>
+                                    <small style="color: var(--text-muted);" th:text="${app.user.yearOfStudy}">3rd Year</small>
+                                </td>
+                                <td>
+                                    <span th:text="${app.preferredBlock != null ? app.preferredBlock.blockName : 'Any'}">Block A</span><br>
+                                    <small style="color: var(--text-muted);" th:text="${app.preferredRoomType}">Double</small>
+                                </td>
+                                <td style="max-width: 180px; font-size: 0.825rem;">
+                                    <span th:text="${app.specialRequests != null and !#strings.isEmpty(app.specialRequests) ? app.specialRequests : '-'}">None</span>
+                                </td>
+                                <td th:text="${#temporals.format(app.appliedAt, 'dd MMM yyyy, HH:mm')}">Date</td>
+                                <td>
+                                    <span class="badge" 
+                                          th:classappend="${app.status == 'APPROVED' ? 'badge-approved' : (app.status == 'PENDING' ? 'badge-pending' : (app.status == 'WAITLISTED' ? 'badge-waitlisted' : 'badge-rejected'))}"
+                                          th:text="${app.status}">
+                                        PENDING
+                                    </span>
+                                </td>
+                                <td style="min-width: 250px;">
+                                    <!-- Review Form (Pure HTML POST) -->
+                                    <form th:action="@{/admin/applications/review}" method="post" style="display: flex; flex-direction: column; gap: 0.4rem;">
+                                        <input type="hidden" name="applicationId" th:value="${app.id}">
+                                        
+                                        <div style="display: flex; gap: 0.35rem;">
+                                            <input type="text" name="adminRemarks" class="form-control" style="font-size: 0.8rem; padding: 0.25rem 0.5rem;" 
+                                                   placeholder="Add remarks..." th:value="${app.adminRemarks}">
+                                        </div>
+
+                                        <div style="display: flex; gap: 0.25rem; flex-wrap: wrap;">
+                                            <button type="submit" name="status" value="APPROVED" class="btn btn-sm btn-primary" style="background: #059669; border-color: #059669;">
+                                                &#10004; Approve
+                                            </button>
+                                            <button type="submit" name="status" value="WAITLISTED" class="btn btn-sm btn-purple">
+                                                &#9203; Waitlist
+                                            </button>
+                                            <button type="submit" name="status" value="REJECTED" class="btn btn-sm btn-danger">
+                                                &#10006; Reject
+                                            </button>
+                                        </div>
+                                    </form>
+
+                                    <!-- Quick Allocation Shortcut Link for Approved Applications -->
+                                    <div th:if="${app.status == 'APPROVED'}" style="margin-top: 0.4rem;">
+                                        <a th:href="@{/admin/allocations(preselectAppId=${app.id})}" class="btn btn-outline-primary btn-sm" style="display: block; text-align: center; font-size: 0.775rem;">
+                                            &#128716; Allocate Room Bed &rarr;
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

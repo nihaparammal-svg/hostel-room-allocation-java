@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html-head('Browse Rooms - Student Portal')}"></head>
+<body>
+
+    <header th:replace="~{fragments/layout :: navbar('rooms')}"></header>
+
+    <main class="main-content">
+        <div class="container">
+            
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h1 style="color: var(--primary-blue); font-size: 1.85rem; margin-bottom: 0.25rem;">Browse Hostel Rooms &amp; Vacancies</h1>
+                    <p style="font-size: 0.95rem; margin-bottom: 0;">Explore room amenities, floor layouts, and bed vacancies in each residential block.</p>
+                </div>
+                <div>
+                    <a th:href="@{/student/apply}" class="btn btn-primary">&#128221; Apply for Hostel</a>
+                </div>
+            </div>
+
+            <!-- Server-Side Filter Form (Pure HTTP GET) -->
+            <form th:action="@{/student/rooms}" method="get" class="filter-bar">
+                <div style="flex: 1; min-width: 180px;">
+                    <label for="blockId" class="form-label">Hostel Block</label>
+                    <select id="blockId" name="blockId" class="form-select">
+                        <option value="">All Blocks</option>
+                        <option th:each="block : ${blocks}" 
+                                th:value="${block.id}" 
+                                th:text="${block.blockName}"
+                                th:selected="${selectedBlockId != null and selectedBlockId == block.id}">
+                            Block Name
+                        </option>
+                    </select>
+                </div>
+
+                <div style="flex: 1; min-width: 160px;">
+                    <label for="roomType" class="form-label">Room Type</label>
+                    <select id="roomType" name="roomType" class="form-select">
+                        <option value="">All Room Types</option>
+                        <option value="Single" th:selected="${selectedRoomType == 'Single'}">Single (1 Bed)</option>
+                        <option value="Double" th:selected="${selectedRoomType == 'Double'}">Double (2 Beds)</option>
+                        <option value="Triple" th:selected="${selectedRoomType == 'Triple'}">Triple (3 Beds)</option>
+                        <option value="Dormitory" th:selected="${selectedRoomType == 'Dormitory'}">Dormitory (4+ Beds)</option>
+                    </select>
+                </div>
+
+                <div style="flex: 1; min-width: 150px;">
+                    <label for="status" class="form-label">Availability Status</label>
+                    <select id="status" name="status" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option value="AVAILABLE" th:selected="${selectedStatus == 'AVAILABLE'}">Available</option>
+                        <option value="FULL" th:selected="${selectedStatus == 'FULL'}">Fully Booked</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 0.5rem;">
+                    <button type="submit" class="btn btn-primary">&#128269; Filter Rooms</button>
+                    <a th:href="@{/student/rooms}" class="btn btn-outline">&#8635; Reset</a>
+                </div>
+            </form>
+
+            <!-- Rooms Grid -->
+            <div th:if="${#lists.isEmpty(rooms)}" class="card" style="text-align: center; padding: 3rem 1.5rem;">
+                <div style="font-size: 2.5rem; margin-bottom: 1rem;">&#128716;</div>
+                <h3 style="color: var(--primary-blue); margin-bottom: 0.5rem;">No Rooms Match Selection</h3>
+                <p>Try resetting filters to view all campus accommodations.</p>
+                <a th:href="@{/student/rooms}" class="btn btn-outline-primary" style="margin-top: 1rem;">Clear Filters</a>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(rooms)}" class="rooms-grid">
+                <div th:each="room : ${rooms}" class="room-card card-hover">
+                    <div>
+                        <div class="room-card-header">
+                            <div>
+                                <div class="room-number" th:text="'Room ' + ${room.roomNumber}">Room 101</div>
+                                <div class="room-block" th:text="${room.block.blockName}">Block A</div>
+                            </div>
+                            <span class="badge"
+                                  th:classappend="${room.available ? 'badge-available' : (room.status == 'FULL' ? 'badge-full' : 'badge-maintenance')}"
+                                  th:text="${room.available ? room.availableBeds + ' Free Beds' : room.status}">
+                                AVAILABLE
+                            </span>
+                        </div>
+
+                        <ul class="room-specs">
+                            <li class="room-spec-item">
+                                <span style="color: var(--text-muted);">Floor:</span>
+                                <strong>Floor <span th:text="${room.floor}">1</span></strong>
+                            </li>
+                            <li class="room-spec-item">
+                                <span style="color: var(--text-muted);">Room Type:</span>
+                                <strong th:text="${room.roomType}">Double</strong>
+                            </li>
+                            <li class="room-spec-item">
+                                <span style="color: var(--text-muted);">Capacity:</span>
+                                <strong th:text="${room.capacity} + ' Beds'">2 Beds</strong>
+                            </li>
+                            <li class="room-spec-item">
+                                <span style="color: var(--text-muted);">Occupied:</span>
+                                <span th:text="${room.activeAllocationsCount} + ' Beds'">1 Bed</span>
+                            </li>
+                            <li class="room-spec-item">
+                                <span style="color: var(--text-muted);">Available Vacancy:</span>
+                                <strong style="color: #059669;" th:text="${room.availableBeds} + ' Free'">1 Free</strong>
+                            </li>
+                        </ul>
+
+                        <div th:if="${room.facilities != null and !#strings.isEmpty(room.facilities)}" class="room-facilities">
+                            <span th:each="facility : ${#strings.arraySplit(room.facilities, ',')}" 
+                                  class="facility-pill" 
+                                  th:text="${#strings.trim(facility)}">WiFi</span>
+                        </div>
+                    </div>
+
+                    <div style="border-top: 1px solid var(--border-subtle); padding-top: 1rem; margin-top: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Monthly Fee</span>
+                            <span class="room-price" th:text="'$' + ${room.monthlyFee}">$4500</span>
+                        </div>
+                        <div>
+                            <a th:href="@{/student/apply}" class="btn btn-primary btn-sm">Select &amp; Apply</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

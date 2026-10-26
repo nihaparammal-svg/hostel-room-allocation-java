@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html-head('Student Dashboard')}"></head>
+<body>
+
+    <header th:replace="~{fragments/layout :: navbar('dashboard')}"></header>
+
+    <main class="main-content">
+        <div class="container">
+            
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <!-- Welcome Header Card -->
+            <div class="card" style="background: linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%); border-color: var(--primary-light); margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <span class="badge badge-waitlisted" style="margin-bottom: 0.5rem;">&#127891; Student Residency Portal</span>
+                        <h1 style="color: var(--primary-blue); font-size: 1.85rem; margin-bottom: 0.25rem;">
+                            Welcome, <span th:text="${student.fullName}">Alex Morgan</span>!
+                        </h1>
+                        <p style="margin-bottom: 0; font-size: 0.95rem;">
+                            Student ID: <strong th:text="${student.studentId}">STU2024001</strong> | 
+                            Department: <span th:text="${student.department}">Computer Science</span> (<span th:text="${student.yearOfStudy}">3rd Year</span>)
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <a th:href="@{/student/rooms}" class="btn btn-outline-primary btn-sm">&#128269; Browse Rooms</a>
+                        <a th:href="@{/student/apply}" class="btn btn-primary btn-sm">&#128221; Apply for Room</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Campus Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-blue">&#127960;</div>
+                    <div>
+                        <div class="stat-value" th:text="${totalRooms}">0</div>
+                        <div class="stat-label">Total Hostel Rooms</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-green">&#10004;</div>
+                    <div>
+                        <div class="stat-value" th:text="${availableBeds}">0</div>
+                        <div class="stat-label">Available Vacant Beds</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-purple">&#128101;</div>
+                    <div>
+                        <div class="stat-value" th:text="${occupiedBeds}">0</div>
+                        <div class="stat-label">Occupied Beds</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-amber">&#128276;</div>
+                    <div>
+                        <div class="stat-value" th:text="${unreadCount}">0</div>
+                        <div class="stat-label">Unread Notifications</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dual Status Grid: My Room & My Application -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                
+                <!-- Card 1: My Allocated Room Details -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">&#128716; My Allocated Room Details</h2>
+                        <a th:if="${activeAllocation != null}" th:href="@{/student/my-room}" class="btn btn-outline-primary btn-sm">Full Details &rarr;</a>
+                    </div>
+
+                    <div th:if="${activeAllocation == null}" style="text-align: center; padding: 2rem 1rem;">
+                        <div style="font-size: 2.25rem; margin-bottom: 0.75rem;">&#128274;</div>
+                        <h3 style="font-size: 1.15rem; color: var(--primary-blue); margin-bottom: 0.5rem;">No Active Room Allocation</h3>
+                        <p style="font-size: 0.9rem; margin-bottom: 1.25rem;">You do not currently have an assigned hostel bed. Submit an application or check your application review status below.</p>
+                        <a th:href="@{/student/apply}" class="btn btn-primary btn-sm">&#128221; Submit Hostel Application</a>
+                    </div>
+
+                    <div th:if="${activeAllocation != null}">
+                        <div style="background-color: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                                <div>
+                                    <span style="font-size: 1.25rem; font-weight: 800; color: var(--primary-blue);" th:text="'Room ' + ${activeAllocation.room.roomNumber}">Room 101</span>
+                                    <span class="badge badge-approved" style="margin-left: 0.5rem;" th:text="${activeAllocation.bedNumber}">Bed-1</span>
+                                </div>
+                                <span class="badge badge-approved">ACTIVE RESIDENT</span>
+                            </div>
+
+                            <ul class="room-specs" style="margin-bottom: 0;">
+                                <li class="room-spec-item">
+                                    <span>Hostel Block:</span>
+                                    <strong th:text="${activeAllocation.room.block.blockName}">Block A</strong>
+                                </li>
+                                <li class="room-spec-item">
+                                    <span>Floor:</span>
+                                    <span th:text="'Floor ' + ${activeAllocation.room.floor}">Floor 1</span>
+                                </li>
+                                <li class="room-spec-item">
+                                    <span>Room Type:</span>
+                                    <span th:text="${activeAllocation.room.roomType}">Double</span>
+                                </li>
+                                <li class="room-spec-item">
+                                    <span>Monthly Fee:</span>
+                                    <strong style="color: var(--primary-blue);" th:text="'$' + ${activeAllocation.room.monthlyFee}">$4500.00</strong>
+                                </li>
+                                <li class="room-spec-item">
+                                    <span>Allocated Since:</span>
+                                    <span th:text="${#temporals.format(activeAllocation.allocatedAt, 'dd MMM yyyy')}">Date</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <a th:href="@{/student/my-room}" class="btn btn-outline-primary btn-sm" style="width: 100%;">View Room Facilities &amp; Roommates</a>
+                    </div>
+                </div>
+
+                <!-- Card 2: My Latest Application Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">&#128221; My Application Status</h2>
+                        <a th:href="@{/student/my-application}" class="btn btn-outline-primary btn-sm">History &rarr;</a>
+                    </div>
+
+                    <div th:if="${latestApplication == null}" style="text-align: center; padding: 2rem 1rem;">
+                        <div style="font-size: 2.25rem; margin-bottom: 0.75rem;">&#128196;</div>
+                        <h3 style="font-size: 1.15rem; color: var(--primary-blue); margin-bottom: 0.5rem;">No Application On File</h3>
+                        <p style="font-size: 0.9rem; margin-bottom: 1.25rem;">You haven't submitted any hostel room application yet. Apply online now to secure your residency.</p>
+                        <a th:href="@{/student/apply}" class="btn btn-purple btn-sm">Start Application Now</a>
+                    </div>
+
+                    <div th:if="${latestApplication != null}">
+                        <div style="background-color: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                                <div>
+                                    <span style="font-weight: 700; color: var(--primary-blue);" th:text="'Application #' + ${latestApplication.id}">App #1</span>
+                                    <span style="font-size: 0.8rem; color: var(--text-muted); display: block;" th:text="${#temporals.format(latestApplication.appliedAt, 'dd MMM yyyy, HH:mm')}">Date</span>
+                                </div>
+                                <span class="badge" 
+                                      th:classappend="${latestApplication.status == 'APPROVED' ? 'badge-approved' : (latestApplication.status == 'PENDING' ? 'badge-pending' : (latestApplication.status == 'WAITLISTED' ? 'badge-waitlisted' : 'badge-rejected'))}"
+                                      th:text="${latestApplication.status}">
+                                    PENDING
+                                </span>
+                            </div>
+
+                            <ul class="room-specs" style="margin-bottom: 0.75rem;">
+                                <li class="room-spec-item">
+                                    <span>Preferred Block:</span>
+                                    <strong th:text="${latestApplication.preferredBlock != null ? latestApplication.preferredBlock.blockName : 'Any Block'}">Block A</strong>
+                                </li>
+                                <li class="room-spec-item">
+                                    <span>Preferred Type:</span>
+                                    <span th:text="${latestApplication.preferredRoomType}">Double</span>
+                                </li>
+                            </ul>
+
+                            <div th:if="${latestApplication.adminRemarks != null and !#strings.isEmpty(latestApplication.adminRemarks)}" 
+                                 style="padding: 0.75rem; background-color: var(--primary-subtle); border-radius: var(--radius-sm); font-size: 0.85rem; border-left: 3px solid var(--primary-accent);">
+                                <strong>Admin Remarks: </strong>
+                                <span th:text="${latestApplication.adminRemarks}">Remarks from warden</span>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 0.5rem;">
+                            <a th:href="@{/student/my-application}" class="btn btn-outline btn-sm" style="flex: 1;">Track Full Status</a>
+                            <a th:if="${latestApplication.status == 'REJECTED'}" th:href="@{/student/apply}" class="btn btn-primary btn-sm" style="flex: 1;">Re-apply</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Recent Notifications Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">&#128276; Recent Notifications &amp; Alerts</h2>
+                    <a th:href="@{/student/notifications}" class="btn btn-outline-primary btn-sm">View All &rarr;</a>
+                </div>
+
+                <div th:if="${#lists.isEmpty(notifications)}" style="text-align: center; padding: 1.5rem; color: var(--text-muted);">
+                    <p style="margin-bottom: 0;">No notifications at this time.</p>
+                </div>
+
+                <div th:unless="${#lists.isEmpty(notifications)}" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <div th:each="notif : ${#lists.size(notifications) > 3 ? notifications.subList(0, 3) : notifications}" 
+                         style="padding: 0.85rem 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: #ffffff; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
+                        <div>
+                            <div style="font-weight: 700; color: var(--primary-blue); font-size: 0.95rem; margin-bottom: 0.2rem;" th:text="${notif.title}">Notice Title</div>
+                            <div style="font-size: 0.875rem; color: var(--text-secondary);" th:text="${notif.message}">Notice details text here.</div>
+                        </div>
+                        <span style="font-size: 0.775rem; color: var(--text-muted); white-space: nowrap;" th:text="${#temporals.format(notif.createdAt, 'dd MMM, HH:mm')}">Date</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

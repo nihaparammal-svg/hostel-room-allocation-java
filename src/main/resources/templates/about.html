@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html-head('About Us')}"></head>
+<body>
+
+    <header th:replace="~{fragments/layout :: navbar('about')}"></header>
+
+    <main class="main-content">
+        <div class="container">
+            
+            <div style="max-width: 900px; margin: 0 auto;">
+                <div class="card" style="margin-bottom: 2rem;">
+                    <h1 style="color: var(--primary-blue); font-size: 2rem; margin-bottom: 1rem;">About The College Hostel System</h1>
+                    <p style="font-size: 1.05rem; line-height: 1.8;">
+                        The College Hostel Room Allocation and Vacancy Registration System is an automated, secure institutional platform designed to eradicate manual paperwork and favoritism in college residential allocations.
+                    </p>
+                    <p style="font-size: 1.05rem; line-height: 1.8;">
+                        Built exclusively using Java, Spring Boot, Spring Data JPA, and Thymeleaf, the system guarantees 100% data integrity, atomic bed vacancy calculations, and ironclad multi-user data isolation between student and administrative accounts.
+                    </p>
+                </div>
+
+                <div class="card" style="margin-bottom: 2rem;">
+                    <h2 style="color: var(--primary-blue); font-size: 1.4rem; margin-bottom: 1rem;">Hostel Facilities &amp; Standards</h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem;">
+                        <div style="padding: 1rem; background-color: #f8fafc; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                            <h4 style="color: var(--primary-accent); margin-bottom: 0.5rem;">&#128246; High-Speed Connectivity</h4>
+                            <p style="font-size: 0.875rem; margin-bottom: 0;">24/7 dedicated fiber optic Wi-Fi access in every wing and study carrel.</p>
+                        </div>
+                        <div style="padding: 1rem; background-color: #f8fafc; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                            <h4 style="color: var(--primary-accent); margin-bottom: 0.5rem;">&#128737; Comprehensive Security</h4>
+                            <p style="font-size: 0.875rem; margin-bottom: 0;">Biometric entry checkpoints, perimeter CCTV surveillance, and 24/7 security wardens.</p>
+                        </div>
+                        <div style="padding: 1rem; background-color: #f8fafc; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                            <h4 style="color: var(--primary-accent); margin-bottom: 0.5rem;">&#9749; Dining &amp; Cafeteria</h4>
+                            <p style="font-size: 0.875rem; margin-bottom: 0;">Hygienic vegetarian and non-vegetarian meal plans inspected by campus health officials.</p>
+                        </div>
+                        <div style="padding: 1rem; background-color: #f8fafc; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                            <h4 style="color: var(--primary-accent); margin-bottom: 0.5rem;">&#128218; Modern Study Lounges</h4>
+                            <p style="font-size: 0.875rem; margin-bottom: 0;">Air-conditioned quiet study rooms equipped with reading lamps and charging hubs.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 style="color: var(--primary-blue); font-size: 1.4rem; margin-bottom: 1rem;">Hostel Residency Rules</h2>
+                    <ul style="padding-left: 1.25rem; color: var(--text-secondary); line-height: 1.8;">
+                        <li>Residency is allocated for one academic year and must be re-applied for subsequent semesters.</li>
+                        <li>Bed transfers or subletting are strictly prohibited without written approval from the Chief Warden.</li>
+                        <li>Campus curfew is 10:00 PM for all residential wings unless authorized by academic leave permits.</li>
+                        <li>All rooms are subject to periodic safety and maintenance inspections by hostel administration.</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

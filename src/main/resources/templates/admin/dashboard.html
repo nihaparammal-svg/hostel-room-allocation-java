@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html-head('Admin Dashboard')}"></head>
+<body>
+
+    <header th:replace="~{fragments/layout :: navbar('admin-dashboard')}"></header>
+
+    <main class="main-content">
+        <div class="container">
+            
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <!-- Admin Overview Banner -->
+            <div class="card" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #ffffff; margin-bottom: 2rem; border: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <span class="badge badge-waitlisted" style="background-color: rgba(255, 255, 255, 0.2); color: #ffffff; border: none; margin-bottom: 0.5rem;">
+                            &#128737; Hostels Administration Hub
+                        </span>
+                        <h1 style="color: #ffffff; font-size: 1.85rem; margin-bottom: 0.25rem;">
+                            Hostel Management Dashboard
+                        </h1>
+                        <p style="color: #cbd5e1; font-size: 0.95rem; margin-bottom: 0;">
+                            Institutional residency statistics, capacity controls, application processing, and bed assignments.
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <a th:href="@{/admin/rooms/add}" class="btn btn-primary btn-sm">&#43; Add New Room</a>
+                        <a th:href="@{/admin/allocations}" class="btn btn-purple btn-sm">&#128716; Allocate Beds</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Live Statistics Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-blue">&#127891;</div>
+                    <div>
+                        <div class="stat-value" th:text="${totalStudents}">0</div>
+                        <div class="stat-label">Registered Students</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-purple">&#127960;</div>
+                    <div>
+                        <div class="stat-value" th:text="${totalRooms}">0</div>
+                        <div class="stat-label">Total Rooms</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-blue">&#128716;</div>
+                    <div>
+                        <div class="stat-value" th:text="${totalCapacity}">0</div>
+                        <div class="stat-label">Total Bed Capacity</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-green">&#10004;</div>
+                    <div>
+                        <div class="stat-value" th:text="${availableBeds}">0</div>
+                        <div class="stat-label">Available Beds</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-purple">&#128101;</div>
+                    <div>
+                        <div class="stat-value" th:text="${occupiedBeds}">0</div>
+                        <div class="stat-label">Occupied Beds</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-amber">&#9203;</div>
+                    <div>
+                        <div class="stat-value" th:text="${pendingApplications}">0</div>
+                        <div class="stat-label">Pending Applications</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-green">&#9989;</div>
+                    <div>
+                        <div class="stat-value" th:text="${approvedApplications}">0</div>
+                        <div class="stat-label">Approved Applications</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Management Navigation Cards -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+                <a th:href="@{/admin/rooms}" class="card card-hover" style="display: block; color: inherit; text-decoration: none;">
+                    <div style="font-size: 1.75rem; margin-bottom: 0.5rem; color: var(--primary-accent);">&#127970;</div>
+                    <h3 style="font-size: 1.15rem; color: var(--primary-blue); margin-bottom: 0.25rem;">Room Management</h3>
+                    <p style="font-size: 0.85rem; margin-bottom: 0;">Add, modify rooms, configure capacities, and manage maintenance.</p>
+                </a>
+
+                <a th:href="@{/admin/applications}" class="card card-hover" style="display: block; color: inherit; text-decoration: none;">
+                    <div style="font-size: 1.75rem; margin-bottom: 0.5rem; color: var(--purple-main);">&#128221;</div>
+                    <h3 style="font-size: 1.15rem; color: var(--primary-blue); margin-bottom: 0.25rem;">Applications Desk</h3>
+                    <p style="font-size: 0.85rem; margin-bottom: 0;">Review student applications, approve, reject, or place on waitlist.</p>
+                </a>
+
+                <a th:href="@{/admin/allocations}" class="card card-hover" style="display: block; color: inherit; text-decoration: none;">
+                    <div style="font-size: 1.75rem; margin-bottom: 0.5rem; color: #059669;">&#128716;</div>
+                    <h3 style="font-size: 1.15rem; color: var(--primary-blue); margin-bottom: 0.25rem;">Room Allocation</h3>
+                    <p style="font-size: 0.85rem; margin-bottom: 0;">Assign bed numbers to approved students and process room vacations.</p>
+                </a>
+
+                <a th:href="@{/admin/students}" class="card card-hover" style="display: block; color: inherit; text-decoration: none;">
+                    <div style="font-size: 1.75rem; margin-bottom: 0.5rem; color: #d97706;">&#128101;</div>
+                    <h3 style="font-size: 1.15rem; color: var(--primary-blue); margin-bottom: 0.25rem;">Student Directory</h3>
+                    <p style="font-size: 0.85rem; margin-bottom: 0;">Browse registered students, view residency histories, and manage access.</p>
+                </a>
+            </div>
+
+            <!-- Recent Applications & Allocations Dual View -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 1.5rem;">
+                
+                <!-- Recent Applications -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">&#128221; Recent Applications</h2>
+                        <a th:href="@{/admin/applications}" class="btn btn-outline-primary btn-sm">All Applications &rarr;</a>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(recentApplications)}" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                        <p style="margin-bottom: 0;">No applications found.</p>
+                    </div>
+
+                    <div th:unless="${#lists.isEmpty(recentApplications)}" class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Pref. Block</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="app : ${recentApplications}">
+                                    <td>
+                                        <strong th:text="${app.user.fullName}">Student Name</strong><br>
+                                        <small style="color: var(--text-muted);" th:text="${app.user.studentId}">STU001</small>
+                                    </td>
+                                    <td th:text="${app.preferredBlock != null ? app.preferredBlock.blockName : 'Any'}">Block</td>
+                                    <td>
+                                        <span class="badge" 
+                                              th:classappend="${app.status == 'APPROVED' ? 'badge-approved' : (app.status == 'PENDING' ? 'badge-pending' : (app.status == 'WAITLISTED' ? 'badge-waitlisted' : 'badge-rejected'))}"
+                                              th:text="${app.status}">
+                                            STATUS
+                                        </span>
+                                    </td>
+                                    <td th:text="${#temporals.format(app.appliedAt, 'dd MMM')}">Date</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Recent Bed Allocations -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">&#128716; Recent Bed Allocations</h2>
+                        <a th:href="@{/admin/allocations}" class="btn btn-outline-primary btn-sm">All Allocations &rarr;</a>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(recentAllocations)}" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                        <p style="margin-bottom: 0;">No active allocations found.</p>
+                    </div>
+
+                    <div th:unless="${#lists.isEmpty(recentAllocations)}" class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Room &amp; Bed</th>
+                                    <th>Allocated Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="alloc : ${recentAllocations}">
+                                    <td>
+                                        <strong th:text="${alloc.user.fullName}">Student Name</strong><br>
+                                        <small style="color: var(--text-muted);" th:text="${alloc.user.studentId}">STU001</small>
+                                    </td>
+                                    <td>
+                                        <strong th:text="'Room ' + ${alloc.room.roomNumber}">Room 101</strong><br>
+                                        <small style="color: var(--purple-main); font-weight: 600;" th:text="${alloc.bedNumber}">Bed-1</small>
+                                    </td>
+                                    <td th:text="${#temporals.format(alloc.allocatedAt, 'dd MMM yyyy')}">Date</td>
+                                    <td>
+                                        <span class="badge" 
+                                              th:classappend="${alloc.status == 'ACTIVE' ? 'badge-approved' : 'badge-vacated'}"
+                                              th:text="${alloc.status}">
+                                            ACTIVE
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

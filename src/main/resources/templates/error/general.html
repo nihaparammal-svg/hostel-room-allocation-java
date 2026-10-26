@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html-head('Notice')}"></head>
+<body>
+
+    <header th:replace="~{fragments/layout :: navbar('')}"></header>
+
+    <main class="main-content">
+        <div class="container" style="max-width: 600px; text-align: center; padding-block: 4rem;">
+            
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="card" style="box-shadow: var(--shadow-md); padding: 3rem 2rem;">
+                <div style="font-size: 3.5rem; color: #d97706; margin-bottom: 1rem;">&#8505;</div>
+                <h1 style="color: var(--primary-blue); font-size: 2rem; margin-bottom: 0.5rem;">Action Not Permitted</h1>
+                <p style="font-size: 1.05rem; margin-bottom: 1.5rem;" th:text="${errorMessage != null ? errorMessage : 'The requested operation could not be completed due to business rule validation.'}">
+                    Notice message here.
+                </p>
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <a th:href="@{/}" class="btn btn-primary">&#127968; Home</a>
+                    <a th:href="@{/student/dashboard}" class="btn btn-outline">Student Dashboard</a>
+                    <a th:href="@{/admin/dashboard}" class="btn btn-outline-primary">Admin Dashboard</a>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

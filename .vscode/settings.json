@@ -1,0 +1,13 @@
+{
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-21",
+            "path": "C:\\Program Files\\Eclipse Adoptium\\jdk-21.0.12.101-hotspot",
+            "default": true
+        }
+    ],
+    "java.jdt.ls.java.home": "C:\\Program Files\\Eclipse Adoptium\\jdk-21.0.12.101-hotspot",
+    "files.encoding": "utf8",
+    "editor.tabSize": 4,
+    "editor.renderWhitespace": "selection"
+}

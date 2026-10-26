@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html-head('Student Directory')}"></head>
+<body>
+
+    <header th:replace="~{fragments/layout :: navbar('admin-students')}"></header>
+
+    <main class="main-content">
+        <div class="container">
+            
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h1 style="color: var(--primary-blue); font-size: 1.85rem; margin-bottom: 0.25rem;">Student Directory &amp; Accounts</h1>
+                    <p style="font-size: 0.95rem; margin-bottom: 0;">Registered student profiles, residential access status, and history.</p>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <form th:action="@{/admin/students}" method="get" class="filter-bar">
+                <div style="flex: 1;">
+                    <label for="keyword" class="form-label">Search Students</label>
+                    <input type="text" id="keyword" name="keyword" th:value="${searchKeyword}" class="form-control" placeholder="Search by name, student ID, email, or department...">
+                </div>
+
+                <div style="display: flex; gap: 0.5rem;">
+                    <button type="submit" class="btn btn-primary">&#128269; Search</button>
+                    <a th:href="@{/admin/students}" class="btn btn-outline">&#8635; Reset</a>
+                </div>
+            </form>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">&#127891; Registered Students (<span th:text="${#lists.size(students)}">0</span>)</h2>
+                </div>
+
+                <div th:if="${#lists.isEmpty(students)}" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                    <p style="margin-bottom: 0;">No student accounts found matching search.</p>
+                </div>
+
+                <div th:unless="${#lists.isEmpty(students)}" class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Student ID</th>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Mobile</th>
+                                <th>Department</th>
+                                <th>Year</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="s : ${students}">
+                                <td><strong style="color: var(--purple-main);" th:text="${s.studentId}">STU001</strong></td>
+                                <td><strong style="color: var(--primary-blue);" th:text="${s.fullName}">Student Name</strong></td>
+                                <td th:text="${s.email}">student@hostel.edu</td>
+                                <td th:text="${s.phone}">+1-555-0100</td>
+                                <td th:text="${s.department}">Computer Science</td>
+                                <td th:text="${s.yearOfStudy}">3rd Year</td>
+                                <td>
+                                    <span class="badge" 
+                                          th:classappend="${s.active ? 'badge-approved' : 'badge-rejected'}"
+                                          th:text="${s.active ? 'ACTIVE' : 'DEACTIVATED'}">
+                                        ACTIVE
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="table-actions">
+                                        <a th:href="@{/admin/students/{id}/history(id=${s.id})}" class="btn btn-outline-primary btn-sm">
+                                            &#128196; History
+                                        </a>
+
+                                        <!-- Toggle Account Status Form (Pure HTML POST) -->
+                                        <form th:action="@{/admin/students/{id}/toggle-status(id=${s.id})}" method="post"
+                                              style="display: inline;">
+                                            <button type="submit" class="btn btn-sm" 
+                                                    th:classappend="${s.active ? 'btn-outline' : 'btn-primary'}"
+                                                    th:text="${s.active ? 'Deactivate' : 'Activate'}">
+                                                Toggle
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

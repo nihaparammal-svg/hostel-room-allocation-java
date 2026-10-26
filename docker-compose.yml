@@ -1,0 +1,42 @@
+services:
+  # MySQL Database Service
+  mysql:
+    image: mysql:8.0
+    container_name: hostel_mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: hostel_db
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_USER: hostel_user
+      MYSQL_PASSWORD: hostel_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./src/main/resources/db/migration/schema-mysql.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Java Spring Boot Monolith Application Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hostel_app
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: mysql
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/hostel_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: hostel_user
+      SPRING_DATASOURCE_PASSWORD: hostel_password
+    ports:
+      - "8080:8080"
+
+volumes:
+  mysql_data:

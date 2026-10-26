@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html-head('Room Management')}"></head>
+<body>
+
+    <header th:replace="~{fragments/layout :: navbar('admin-rooms')}"></header>
+
+    <main class="main-content">
+        <div class="container">
+            
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h1 style="color: var(--primary-blue); font-size: 1.85rem; margin-bottom: 0.25rem;">Hostel Room Management</h1>
+                    <p style="font-size: 0.95rem; margin-bottom: 0;">Configure campus rooms, track bed vacancies, and maintain facilities.</p>
+                </div>
+                <div>
+                    <a th:href="@{/admin/rooms/add}" class="btn btn-primary">
+                        <span>&#43; Add New Room</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Filter Bar (Pure HTTP GET) -->
+            <form th:action="@{/admin/rooms}" method="get" class="filter-bar">
+                <div style="flex: 1; min-width: 180px;">
+                    <label for="blockId" class="form-label">Hostel Block</label>
+                    <select id="blockId" name="blockId" class="form-select">
+                        <option value="">All Blocks</option>
+                        <option th:each="block : ${blocks}" 
+                                th:value="${block.id}" 
+                                th:text="${block.blockName}"
+                                th:selected="${selectedBlockId != null and selectedBlockId == block.id}">
+                            Block Name
+                        </option>
+                    </select>
+                </div>
+
+                <div style="flex: 1; min-width: 160px;">
+                    <label for="roomType" class="form-label">Room Type</label>
+                    <select id="roomType" name="roomType" class="form-select">
+                        <option value="">All Types</option>
+                        <option value="Single" th:selected="${selectedRoomType == 'Single'}">Single</option>
+                        <option value="Double" th:selected="${selectedRoomType == 'Double'}">Double</option>
+                        <option value="Triple" th:selected="${selectedRoomType == 'Triple'}">Triple</option>
+                        <option value="Dormitory" th:selected="${selectedRoomType == 'Dormitory'}">Dormitory</option>
+                    </select>
+                </div>
+
+                <div style="flex: 1; min-width: 150px;">
+                    <label for="status" class="form-label">Status</label>
+                    <select id="status" name="status" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option value="AVAILABLE" th:selected="${selectedStatus == 'AVAILABLE'}">Available</option>
+                        <option value="FULL" th:selected="${selectedStatus == 'FULL'}">Full</option>
+                        <option value="MAINTENANCE" th:selected="${selectedStatus == 'MAINTENANCE'}">Maintenance</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 0.5rem;">
+                    <button type="submit" class="btn btn-primary">&#128269; Filter</button>
+                    <a th:href="@{/admin/rooms}" class="btn btn-outline">&#8635; Reset</a>
+                </div>
+            </form>
+
+            <!-- Rooms Management Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">&#127970; Campus Rooms (<span th:text="${#lists.size(rooms)}">0</span>)</h2>
+                </div>
+
+                <div th:if="${#lists.isEmpty(rooms)}" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                    <p style="margin-bottom: 0;">No rooms found matching the criteria.</p>
+                </div>
+
+                <div th:unless="${#lists.isEmpty(rooms)}" class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Room</th>
+                                <th>Hostel Block</th>
+                                <th>Floor</th>
+                                <th>Type</th>
+                                <th>Capacity</th>
+                                <th>Active Occupancy</th>
+                                <th>Available Beds</th>
+                                <th>Monthly Fee</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="room : ${rooms}">
+                                <td><strong style="color: var(--primary-blue);" th:text="'Room ' + ${room.roomNumber}">Room 101</strong></td>
+                                <td th:text="${room.block.blockName}">Block A</td>
+                                <td th:text="'Floor ' + ${room.floor}">1</td>
+                                <td th:text="${room.roomType}">Double</td>
+                                <td th:text="${room.capacity} + ' Beds'">2 Beds</td>
+                                <td>
+                                    <span th:text="${room.activeAllocationsCount} + ' Occupied'">1 Occupied</span>
+                                </td>
+                                <td>
+                                    <strong style="color: #059669;" th:text="${room.availableBeds} + ' Free'">1 Free</strong>
+                                </td>
+                                <td th:text="'$' + ${room.monthlyFee}">$4500.00</td>
+                                <td>
+                                    <span class="badge" 
+                                          th:classappend="${room.available ? 'badge-available' : (room.status == 'FULL' ? 'badge-full' : 'badge-maintenance')}"
+                                          th:text="${room.status}">
+                                        AVAILABLE
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="table-actions">
+                                        <a th:href="@{/admin/rooms/edit/{id}(id=${room.id})}" class="btn btn-outline-primary btn-sm">&#9998; Edit</a>
+                                        
+                                        <!-- Safe Delete Form (Pure HTML POST) -->
+                                        <form th:action="@{/admin/rooms/delete/{id}(id=${room.id})}" method="post" 
+                                              style="display: inline;">
+                                            <button type="submit" class="btn btn-danger btn-sm" th:disabled="${room.activeAllocationsCount > 0}">
+                                                &#128465; Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

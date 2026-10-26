@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html-head('Login')}"></head>
+<body>
+
+    <header th:replace="~{fragments/layout :: navbar('login')}"></header>
+
+    <main class="main-content">
+        <div class="container" style="max-width: 480px;">
+            
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="card" style="box-shadow: var(--shadow-md); padding: 2.25rem;">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <div style="width: 56px; height: 56px; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--primary-accent), var(--purple-main)); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin: 0 auto 1rem;">
+                        &#127970;
+                    </div>
+                    <h1 style="color: var(--primary-blue); font-size: 1.6rem; margin-bottom: 0.35rem;">Hostel Portal Login</h1>
+                    <p style="font-size: 0.9rem; margin-bottom: 0;">Sign in to access your student or administrator dashboard.</p>
+                </div>
+
+                <form th:action="@{/auth/login-process}" method="post">
+                    <div class="form-group">
+                        <label for="username" class="form-label">Email or Student ID</label>
+                        <input type="text" id="username" name="username" class="form-control" placeholder="Enter your registered email or student ID" required autofocus>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" id="password" name="password" class="form-control" placeholder="Enter password" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.75rem;">
+                        &#128272; Sign In
+                    </button>
+                </form>
+
+                <div style="margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle); text-align: center;">
+                    <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">
+                        New student? 
+                        <a th:href="@{/auth/register}" style="font-weight: 700; color: var(--purple-main);">Register here</a>
+                    </p>
+                </div>
+
+                <!-- Test accounts notice -->
+                <div style="margin-top: 1.5rem; padding: 0.85rem; background-color: var(--purple-subtle); border: 1px dashed var(--purple-light); border-radius: var(--radius-md); font-size: 0.825rem;">
+                    <strong>&#128161; Default Accounts:</strong><br>
+                    Student: <code>alex.student@hostel.edu</code> / <code>Student@123</code><br>
+                    Admin: <code>admin@hostel.edu</code> / <code>Admin@123</code>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

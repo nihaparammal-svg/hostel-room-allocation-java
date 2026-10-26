@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html-head('Admin Login')}"></head>
+<body>
+
+    <header th:replace="~{fragments/layout :: navbar('admin-login')}"></header>
+
+    <main class="main-content">
+        <div class="container" style="max-width: 480px;">
+            
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="card" style="box-shadow: var(--shadow-md); padding: 2.25rem; border-top: 4px solid var(--purple-main);">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <div style="width: 56px; height: 56px; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--purple-main), #1e1b4b); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin: 0 auto 1rem;">
+                        &#128737;
+                    </div>
+                    <h1 style="color: var(--primary-blue); font-size: 1.6rem; margin-bottom: 0.35rem;">Hostel Administration</h1>
+                    <p style="font-size: 0.9rem; margin-bottom: 0;">Authorized Warden and Administrator Portal Access</p>
+                </div>
+
+                <!-- Spring Security Form Login -->
+                <form th:action="@{/auth/login-process}" method="post">
+                    <div class="form-group">
+                        <label for="username" class="form-label">Administrator Email / ID</label>
+                        <input type="text" id="username" name="username" class="form-control" placeholder="e.g. admin@hostel.edu" required autofocus>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">Administrative Password</label>
+                        <input type="password" id="password" name="password" class="form-control" placeholder="Enter administrator password" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-purple" style="width: 100%; margin-top: 1rem; padding: 0.75rem;">
+                        &#128272; Sign In to Admin Console
+                    </button>
+                </form>
+
+                <div style="margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle); text-align: center;">
+                    <p style="font-size: 0.85rem; margin-bottom: 0;">
+                        Are you a student looking for room booking? 
+                        <a th:href="@{/auth/student-login}" style="color: var(--primary-accent); font-weight: 600;">Student Portal Login &rarr;</a>
+                    </p>
+                </div>
+
+                <!-- Admin Demo Credentials -->
+                <div style="margin-top: 1.5rem; padding: 0.85rem; background-color: var(--purple-subtle); border: 1px dashed var(--purple-light); border-radius: var(--radius-md); font-size: 0.825rem;">
+                    <strong>&#128737; Default Admin Credentials:</strong><br>
+                    Email: <code>admin@hostel.edu</code><br>
+                    Password: <code>Admin@123</code>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

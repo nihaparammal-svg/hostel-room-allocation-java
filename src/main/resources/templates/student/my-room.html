@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html-head('My Room Details')}"></head>
+<body>
+
+    <header th:replace="~{fragments/layout :: navbar('my-room')}"></header>
+
+    <main class="main-content">
+        <div class="container">
+            
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <h1 style="color: var(--primary-blue); font-size: 1.85rem; margin-bottom: 0.25rem;">My Room &amp; Bed Details</h1>
+                <p style="font-size: 0.95rem; margin-bottom: 0;">Residential accommodation details, facilities, and active allocation credentials.</p>
+            </div>
+
+            <!-- Active Room Card -->
+            <div th:if="${activeAllocation == null}" class="card" style="text-align: center; padding: 3rem 1.5rem; margin-bottom: 2rem;">
+                <div style="font-size: 2.75rem; margin-bottom: 1rem;">&#128716;</div>
+                <h2 style="color: var(--primary-blue); font-size: 1.35rem; margin-bottom: 0.5rem;">No Current Active Room Allocation</h2>
+                <p style="max-width: 500px; margin: 0 auto 1.5rem;">
+                    You do not currently have an active allocated room bed. Once the hostel warden reviews and approves your application, your assigned room and bed number will appear here.
+                </p>
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <a th:href="@{/student/apply}" class="btn btn-primary">&#128221; Apply for Hostel</a>
+                    <a th:href="@{/student/my-application}" class="btn btn-outline">Check Application Status</a>
+                </div>
+            </div>
+
+            <div th:if="${activeAllocation != null}">
+                <div class="card" style="margin-bottom: 2rem; border-top: 4px solid #059669;">
+                    <div class="card-header">
+                        <div>
+                            <span class="badge badge-approved" style="margin-bottom: 0.35rem;">&#10004; ACTIVE RESIDENT ALLOCATION</span>
+                            <h2 class="card-title" th:text="${activeAllocation.room.block.blockName} + ' - Room ' + ${activeAllocation.room.roomNumber}">Block A - Room 101</h2>
+                        </div>
+                        <div style="text-align: right;">
+                            <span class="badge badge-waitlisted" style="font-size: 0.95rem; padding: 0.4rem 1rem;" th:text="'Allocated Bed: ' + ${activeAllocation.bedNumber}">Bed-1</span>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
+                        <div style="background-color: #f8fafc; padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                            <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">Hostel Block</span>
+                            <strong style="font-size: 1.05rem; color: var(--primary-blue);" th:text="${activeAllocation.room.block.blockName}">Block A</strong>
+                        </div>
+
+                        <div style="background-color: #f8fafc; padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                            <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">Floor Level</span>
+                            <strong style="font-size: 1.05rem;" th:text="'Floor ' + ${activeAllocation.room.floor}">Floor 1</strong>
+                        </div>
+
+                        <div style="background-color: #f8fafc; padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                            <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">Configuration</span>
+                            <strong style="font-size: 1.05rem;" th:text="${activeAllocation.room.roomType} + ' (' + ${activeAllocation.room.capacity} + ' Beds)'">Double (2 Beds)</strong>
+                        </div>
+
+                        <div style="background-color: #f8fafc; padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                            <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">Monthly Fee</span>
+                            <strong style="font-size: 1.15rem; color: var(--primary-blue);" th:text="'$' + ${activeAllocation.room.monthlyFee}">$4500.00</strong>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <h4 style="font-size: 1rem; color: var(--primary-blue); margin-bottom: 0.75rem;">Room Amenities &amp; Facilities</h4>
+                        <div class="room-facilities">
+                            <span th:each="facility : ${#strings.arraySplit(activeAllocation.room.facilities, ',')}" 
+                                  class="facility-pill" 
+                                  style="padding: 0.4rem 0.85rem; font-size: 0.85rem;"
+                                  th:text="${#strings.trim(facility)}">WiFi</span>
+                        </div>
+                    </div>
+
+                    <div style="background-color: var(--primary-subtle); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--primary-light);">
+                        <h4 style="font-size: 0.95rem; color: var(--primary-blue); margin-bottom: 0.35rem;">Allocation Remarks:</h4>
+                        <p style="margin-bottom: 0; font-size: 0.9rem;" th:text="${activeAllocation.remarks}">Allocated by Hostel Warden.</p>
+                    </div>
+                </div>
+
+                <!-- Room Occupants Table (Transparency in multi-occupant rooms) -->
+                <div class="card" style="margin-bottom: 2rem;">
+                    <div class="card-header">
+                        <h3 class="card-title">&#128101; Room Occupancy Summary</h3>
+                        <span class="badge badge-approved" th:text="${#lists.size(roomOccupants)} + ' / ' + ${room.capacity} + ' Beds Filled'">1 / 2 Beds Filled</span>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Bed Number</th>
+                                    <th>Occupant Name</th>
+                                    <th>Department</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="occupant : ${roomOccupants}">
+                                    <td><strong th:text="${occupant.bedNumber}">Bed-1</strong></td>
+                                    <td>
+                                        <span th:text="${occupant.user.fullName}">Student Name</span>
+                                        <span th:if="${occupant.user.id == student.id}" class="badge badge-waitlisted" style="margin-left: 0.35rem;">YOU</span>
+                                    </td>
+                                    <td th:text="${occupant.user.department}">Department</td>
+                                    <td><span class="badge badge-approved">OCCUPIED</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Allocation History -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">&#128340; My Allocation History</h3>
+                </div>
+
+                <div th:if="${#lists.isEmpty(allocationHistory)}" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                    <p style="margin-bottom: 0;">No past room allocation records found.</p>
+                </div>
+
+                <div th:unless="${#lists.isEmpty(allocationHistory)}" class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Record ID</th>
+                                <th>Hostel Block</th>
+                                <th>Room Number</th>
+                                <th>Bed Number</th>
+                                <th>Allocated Date</th>
+                                <th>Vacated Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="alloc : ${allocationHistory}">
+                                <td><strong th:text="'#' + ${alloc.id}">#1</strong></td>
+                                <td th:text="${alloc.room.block.blockName}">Block A</td>
+                                <td th:text="'Room ' + ${alloc.room.roomNumber}">Room 101</td>
+                                <td><strong th:text="${alloc.bedNumber}">Bed-1</strong></td>
+                                <td th:text="${#temporals.format(alloc.allocatedAt, 'dd MMM yyyy')}">Date</td>
+                                <td th:text="${alloc.vacatedAt != null ? #temporals.format(alloc.vacatedAt, 'dd MMM yyyy') : 'Current'}">Current</td>
+                                <td>
+                                    <span class="badge" 
+                                          th:classappend="${alloc.status == 'ACTIVE' ? 'badge-approved' : 'badge-vacated'}"
+                                          th:text="${alloc.status}">
+                                        ACTIVE
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

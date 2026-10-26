@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html-head('My Application Status')}"></head>
+<body>
+
+    <header th:replace="~{fragments/layout :: navbar('my-app')}"></header>
+
+    <main class="main-content">
+        <div class="container">
+            
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h1 style="color: var(--primary-blue); font-size: 1.85rem; margin-bottom: 0.25rem;">Hostel Application Tracking</h1>
+                    <p style="font-size: 0.95rem; margin-bottom: 0;">Review your current application status, warden remarks, and submission history.</p>
+                </div>
+                <div>
+                    <a th:href="@{/student/apply}" class="btn btn-primary btn-sm">&#128221; New Application</a>
+                </div>
+            </div>
+
+            <!-- Active / Latest Application Card -->
+            <div th:if="${latestApplication != null}" class="card" style="margin-bottom: 2rem; border-left: 4px solid var(--primary-accent);">
+                <div class="card-header">
+                    <div>
+                        <span style="font-size: 0.825rem; font-weight: 700; color: var(--purple-main); text-transform: uppercase;">Latest Submission</span>
+                        <h2 class="card-title" th:text="'Application #' + ${latestApplication.id}">Application #1</h2>
+                    </div>
+                    <span class="badge" 
+                          th:classappend="${latestApplication.status == 'APPROVED' ? 'badge-approved' : (latestApplication.status == 'PENDING' ? 'badge-pending' : (latestApplication.status == 'WAITLISTED' ? 'badge-waitlisted' : 'badge-rejected'))}"
+                          th:text="${latestApplication.status}">
+                        PENDING
+                    </span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
+                    <div style="background-color: #f8fafc; padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                        <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">Preferred Block</span>
+                        <strong style="font-size: 1.05rem; color: var(--primary-blue);" th:text="${latestApplication.preferredBlock != null ? latestApplication.preferredBlock.blockName : 'Any Block'}">Block A</strong>
+                    </div>
+
+                    <div style="background-color: #f8fafc; padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                        <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">Preferred Room Type</span>
+                        <strong style="font-size: 1.05rem;" th:text="${latestApplication.preferredRoomType}">Double</strong>
+                    </div>
+
+                    <div style="background-color: #f8fafc; padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                        <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">Submission Date</span>
+                        <strong style="font-size: 1.05rem;" th:text="${#temporals.format(latestApplication.appliedAt, 'dd MMM yyyy, HH:mm')}">Date</strong>
+                    </div>
+
+                    <div style="background-color: #f8fafc; padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                        <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">Last Updated</span>
+                        <strong style="font-size: 1.05rem;" th:text="${latestApplication.updatedAt != null ? #temporals.format(latestApplication.updatedAt, 'dd MMM yyyy, HH:mm') : 'Pending Review'}">Date</strong>
+                    </div>
+                </div>
+
+                <!-- Admin Remarks Section -->
+                <div style="padding: 1.25rem; background-color: var(--primary-subtle); border: 1px solid #bfdbfe; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+                    <h4 style="color: var(--primary-blue); font-size: 0.95rem; margin-bottom: 0.35rem;">&#128172; Administrator &amp; Warden Remarks</h4>
+                    <p style="margin-bottom: 0; font-size: 0.925rem; color: var(--text-primary);" 
+                       th:text="${latestApplication.adminRemarks != null and !#strings.isEmpty(latestApplication.adminRemarks) ? latestApplication.adminRemarks : 'Your application is currently pending initial administrative review. Remarks will be displayed here once evaluated.'}">
+                        Remarks from the administration
+                    </p>
+                </div>
+
+                <!-- Next Steps or Allocated Banner -->
+                <div th:if="${latestApplication.status == 'APPROVED' and activeAllocation != null}" 
+                     class="alert alert-success" style="margin-bottom: 0;">
+                    <div>
+                        <strong>&#10004; Bed Allocated! </strong>
+                        You have been allocated 
+                        <strong th:text="${activeAllocation.bedNumber} + ' in Room ' + ${activeAllocation.room.roomNumber}">Bed 1 in Room 101</strong>
+                        (<span th:text="${activeAllocation.room.block.blockName}">Block A</span>).
+                    </div>
+                    <a th:href="@{/student/my-room}" class="btn btn-outline-primary btn-sm" style="margin-left: auto;">View Room Details &rarr;</a>
+                </div>
+
+                <div th:if="${latestApplication.status == 'APPROVED' and activeAllocation == null}" 
+                     class="alert alert-info" style="margin-bottom: 0;">
+                    <strong>&#9989; Approved: </strong>
+                    Your application has been approved by the hostel warden. Bed number and room keys are currently being scheduled for assignment.
+                </div>
+            </div>
+
+            <!-- Application History Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">&#128340; Application History</h2>
+                </div>
+
+                <div th:if="${#lists.isEmpty(applications)}" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                    <p style="margin-bottom: 0;">No applications found in your history.</p>
+                </div>
+
+                <div th:unless="${#lists.isEmpty(applications)}" class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>App ID</th>
+                                <th>Preferred Block</th>
+                                <th>Room Type</th>
+                                <th>Special Notes</th>
+                                <th>Status</th>
+                                <th>Applied Date</th>
+                                <th>Admin Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="app : ${applications}">
+                                <td><strong th:text="'#' + ${app.id}">#1</strong></td>
+                                <td th:text="${app.preferredBlock != null ? app.preferredBlock.blockName : 'Any Block'}">Block A</td>
+                                <td th:text="${app.preferredRoomType}">Double</td>
+                                <td style="max-width: 200px; font-size: 0.85rem;" th:text="${app.specialRequests != null and !#strings.isEmpty(app.specialRequests) ? app.specialRequests : '-'}">Notes</td>
+                                <td>
+                                    <span class="badge" 
+                                          th:classappend="${app.status == 'APPROVED' ? 'badge-approved' : (app.status == 'PENDING' ? 'badge-pending' : (app.status == 'WAITLISTED' ? 'badge-waitlisted' : 'badge-rejected'))}"
+                                          th:text="${app.status}">
+                                        PENDING
+                                    </span>
+                                </td>
+                                <td th:text="${#temporals.format(app.appliedAt, 'dd MMM yyyy')}">Date</td>
+                                <td style="max-width: 220px; font-size: 0.85rem;" th:text="${app.adminRemarks != null ? app.adminRemarks : '-'}">Remarks</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>
