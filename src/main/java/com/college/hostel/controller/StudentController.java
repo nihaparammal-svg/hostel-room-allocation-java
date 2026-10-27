@@ -7,19 +7,23 @@ import com.college.hostel.entity.Application;
 import com.college.hostel.entity.Room;
 import com.college.hostel.entity.User;
 import com.college.hostel.exception.BusinessException;
+import com.college.hostel.exception.ResourceNotFoundException;
 import com.college.hostel.service.AllocationService;
 import com.college.hostel.service.ApplicationService;
 import com.college.hostel.service.NotificationService;
 import com.college.hostel.service.RoomService;
 import com.college.hostel.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
 import java.util.Optional;
 
 @Controller
@@ -44,13 +48,26 @@ public class StudentController {
         this.userService = userService;
     }
 
-    private User getAuthenticatedUser(CustomUserDetails userDetails) {
-        return userService.findById(userDetails.getId());
+    private User getAuthenticatedUser(CustomUserDetails userDetails, Principal principal) {
+        if (userDetails != null && userDetails.getId() != null) {
+            return userService.findById(userDetails.getId());
+        }
+        String name = principal != null ? principal.getName() : null;
+        if (name == null) {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null) {
+                name = auth.getName();
+            }
+        }
+        if (name != null && !name.isBlank()) {
+            return userService.findByIdentifier(name);
+        }
+        throw new ResourceNotFoundException("No authenticated student session found. Please log in.");
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        User student = getAuthenticatedUser(userDetails);
+    public String dashboard(@AuthenticationPrincipal CustomUserDetails userDetails, Principal principal, Model model) {
+        User student = getAuthenticatedUser(userDetails, principal);
         Long userId = student.getId();
 
         model.addAttribute("student", student);
@@ -79,9 +96,10 @@ public class StudentController {
             @RequestParam(required = false) String roomType,
             @RequestParam(required = false) String status,
             @AuthenticationPrincipal CustomUserDetails userDetails,
+            Principal principal,
             Model model
     ) {
-        model.addAttribute("student", getAuthenticatedUser(userDetails));
+        model.addAttribute("student", getAuthenticatedUser(userDetails, principal));
         model.addAttribute("rooms", roomService.searchRooms(blockId, roomType, status));
         model.addAttribute("blocks", roomService.getAllBlocks());
         model.addAttribute("selectedBlockId", blockId);
@@ -92,28 +110,44 @@ public class StudentController {
     }
 
     @GetMapping("/apply")
-    public String showApplyForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        User student = getAuthenticatedUser(userDetails);
+    public String showApplyForm(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Principal principal,
+            @RequestParam(name = "blockId", required = false) Long blockId,
+            @RequestParam(name = "roomType", required = false) String roomType,
+            Model model
+    ) {
+        User student = getAuthenticatedUser(userDetails, principal);
         Long userId = student.getId();
 
         // Check if student already has an active room allocation
         Optional<Allocation> activeAlloc = allocationService.getActiveStudentAllocation(userId);
-        if (activeAlloc.isPresent()) {
+        boolean isAllocated = activeAlloc.isPresent();
+        model.addAttribute("alreadyAllocated", isAllocated);
+        if (isAllocated) {
             model.addAttribute("errorMessage", "You already have an active room allocation: Room " +
                     activeAlloc.get().getRoom().getRoomNumber() + " (" + activeAlloc.get().getBedNumber() + ").");
-            model.addAttribute("alreadyAllocated", true);
         }
 
         // Check if student already has a pending or approved application
         Application latestApp = applicationService.getLatestStudentApplication(userId);
         if (latestApp != null && ("PENDING".equals(latestApp.getStatus()) || "APPROVED".equals(latestApp.getStatus()))) {
             model.addAttribute("activeApplication", latestApp);
+        } else {
+            model.addAttribute("activeApplication", null);
         }
 
         model.addAttribute("student", student);
         model.addAttribute("blocks", roomService.getAllBlocks());
         if (!model.containsAttribute("applicationDto")) {
-            model.addAttribute("applicationDto", new ApplicationDto());
+            ApplicationDto dto = new ApplicationDto();
+            if (blockId != null) {
+                dto.setPreferredBlockId(blockId);
+            }
+            if (roomType != null && !roomType.isBlank()) {
+                dto.setPreferredRoomType(roomType);
+            }
+            model.addAttribute("applicationDto", dto);
         }
         return "student/apply";
     }
@@ -121,16 +155,20 @@ public class StudentController {
     @PostMapping("/apply")
     public String submitApplication(
             @AuthenticationPrincipal CustomUserDetails userDetails,
+            Principal principal,
             @Valid @ModelAttribute("applicationDto") ApplicationDto dto,
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes,
             Model model
     ) {
-        User student = getAuthenticatedUser(userDetails);
+        User student = getAuthenticatedUser(userDetails, principal);
+        Long userId = student.getId();
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("student", student);
             model.addAttribute("blocks", roomService.getAllBlocks());
+            model.addAttribute("alreadyAllocated", allocationService.getActiveStudentAllocation(userId).isPresent());
+            model.addAttribute("activeApplication", applicationService.getLatestStudentApplication(userId));
             return "student/apply";
         }
 
@@ -141,14 +179,16 @@ public class StudentController {
         } catch (BusinessException ex) {
             model.addAttribute("student", student);
             model.addAttribute("blocks", roomService.getAllBlocks());
+            model.addAttribute("alreadyAllocated", allocationService.getActiveStudentAllocation(userId).isPresent());
+            model.addAttribute("activeApplication", applicationService.getLatestStudentApplication(userId));
             model.addAttribute("errorMessage", ex.getMessage());
             return "student/apply";
         }
     }
 
     @GetMapping("/my-application")
-    public String myApplication(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        User student = getAuthenticatedUser(userDetails);
+    public String myApplication(@AuthenticationPrincipal CustomUserDetails userDetails, Principal principal, Model model) {
+        User student = getAuthenticatedUser(userDetails, principal);
         Long userId = student.getId();
 
         model.addAttribute("student", student);
@@ -160,8 +200,8 @@ public class StudentController {
     }
 
     @GetMapping("/my-room")
-    public String myRoom(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        User student = getAuthenticatedUser(userDetails);
+    public String myRoom(@AuthenticationPrincipal CustomUserDetails userDetails, Principal principal, Model model) {
+        User student = getAuthenticatedUser(userDetails, principal);
         Long userId = student.getId();
 
         model.addAttribute("student", student);
@@ -179,8 +219,8 @@ public class StudentController {
     }
 
     @GetMapping("/notifications")
-    public String notifications(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        User student = getAuthenticatedUser(userDetails);
+    public String notifications(@AuthenticationPrincipal CustomUserDetails userDetails, Principal principal, Model model) {
+        User student = getAuthenticatedUser(userDetails, principal);
         Long userId = student.getId();
 
         model.addAttribute("student", student);
@@ -193,8 +233,8 @@ public class StudentController {
     }
 
     @GetMapping("/profile")
-    public String profile(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        User student = getAuthenticatedUser(userDetails);
+    public String profile(@AuthenticationPrincipal CustomUserDetails userDetails, Principal principal, Model model) {
+        User student = getAuthenticatedUser(userDetails, principal);
         model.addAttribute("student", student);
         model.addAttribute("activeAllocation", allocationService.getActiveStudentAllocation(student.getId()).orElse(null));
         model.addAttribute("totalApplications", applicationService.getStudentApplications(student.getId()).size());

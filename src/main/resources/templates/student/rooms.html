@@ -120,7 +120,7 @@
                             <span class="room-price" th:text="'$' + ${room.monthlyFee}">$4500</span>
                         </div>
                         <div>
-                            <a th:href="@{/student/apply}" class="btn btn-primary btn-sm">Select &amp; Apply</a>
+                            <a th:href="@{/student/apply(blockId=${room.block.id}, roomType=${room.roomType})}" class="btn btn-primary btn-sm">Select &amp; Apply</a>
                         </div>
                     </div>
                 </div>

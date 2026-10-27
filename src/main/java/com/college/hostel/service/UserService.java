@@ -57,6 +57,16 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
     }
 
+    public User findByIdentifier(String identifier) {
+        if (identifier == null || identifier.isBlank()) {
+            throw new ResourceNotFoundException("User identifier is required.");
+        }
+        String clean = identifier.trim();
+        return userRepository.findByEmail(clean.toLowerCase())
+                .or(() -> userRepository.findByStudentId(clean))
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with identifier: " + clean));
+    }
+
     public User findById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));

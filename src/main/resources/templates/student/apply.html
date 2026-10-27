@@ -11,13 +11,13 @@
             <div th:replace="~{fragments/layout :: alerts}"></div>
 
             <!-- Existing Allocation Warning -->
-            <div th:if="${alreadyAllocated}" class="alert alert-warning">
+            <div th:if="${alreadyAllocated == true}" class="alert alert-warning">
                 <strong>&#9888; Active Room Allocation Found: </strong>
                 You already hold an active hostel room. You cannot submit a duplicate application until your current allocation is vacated.
             </div>
 
             <!-- Existing Active Application Warning -->
-            <div th:if="${activeApplication != null and !alreadyAllocated}" class="alert alert-info">
+            <div th:if="${activeApplication != null and alreadyAllocated != true}" class="alert alert-info">
                 <strong>&#8505; Existing Application in Progress: </strong>
                 You already have Application #<span th:text="${activeApplication.id}">1</span> currently marked as 
                 <strong th:text="${activeApplication.status}">PENDING</strong>.
@@ -51,7 +51,7 @@
                     
                     <div class="form-group">
                         <label for="preferredBlockId" class="form-label">Preferred Hostel Block *</label>
-                        <select id="preferredBlockId" th:field="*{preferredBlockId}" class="form-select" required th:disabled="${alreadyAllocated or activeApplication != null}">
+                        <select id="preferredBlockId" th:field="*{preferredBlockId}" class="form-select" required th:disabled="${alreadyAllocated == true or activeApplication != null}">
                             <option value="">-- Choose Preferred Hostel Block --</option>
                             <option th:each="block : ${blocks}" 
                                     th:value="${block.id}" 
@@ -64,7 +64,7 @@
 
                     <div class="form-group">
                         <label for="preferredRoomType" class="form-label">Preferred Room Type *</label>
-                        <select id="preferredRoomType" th:field="*{preferredRoomType}" class="form-select" required th:disabled="${alreadyAllocated or activeApplication != null}">
+                        <select id="preferredRoomType" th:field="*{preferredRoomType}" class="form-select" required th:disabled="${alreadyAllocated == true or activeApplication != null}">
                             <option value="">-- Choose Room Configuration --</option>
                             <option value="Single">Single Occupancy (1 Bed - AC/Attached Bath)</option>
                             <option value="Double">Double Sharing (2 Beds - Standard)</option>
@@ -76,11 +76,11 @@
 
                     <div class="form-group">
                         <label for="specialRequests" class="form-label">Special Requests / Medical Notes (Optional)</label>
-                        <textarea id="specialRequests" th:field="*{specialRequests}" class="form-control" rows="3" placeholder="e.g. Ground floor preference due to mobility, quiet study room, dietary requests..." th:disabled="${alreadyAllocated or activeApplication != null}"></textarea>
+                        <textarea id="specialRequests" th:field="*{specialRequests}" class="form-control" rows="3" placeholder="e.g. Ground floor preference due to mobility, quiet study room, dietary requests..." th:disabled="${alreadyAllocated == true or activeApplication != null}"></textarea>
                     </div>
 
                     <div style="margin-top: 1.5rem; display: flex; gap: 1rem; align-items: center;">
-                        <button type="submit" class="btn btn-primary btn-lg" style="flex: 1;" th:disabled="${alreadyAllocated or activeApplication != null}">
+                        <button type="submit" class="btn btn-primary btn-lg" style="flex: 1;" th:disabled="${alreadyAllocated == true or activeApplication != null}">
                             &#10004; Submit Application
                         </button>
                         <a th:href="@{/student/dashboard}" class="btn btn-outline">Cancel</a>
