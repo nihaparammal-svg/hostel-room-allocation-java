@@ -248,14 +248,18 @@ git push -u origin main
 
 ---
 
-## 9. Vercel & Cloud Deployment Summary
+## 9. Render & Cloud Deployment
 
-* **Vercel Limitation**: Vercel is built for static frontend assets and short-lived serverless functions (Node.js/Python/Go). It cannot host continuous, monolithic Spring Boot applications running an active embedded Tomcat web server.
-* **Java Cloud Platforms**: For zero-code 1-click deployment of this Spring Boot + MySQL monolith, use:
+* **Render (Recommended)**: Fully configured for **Render Web Service + Render Managed PostgreSQL**.
+  - **1-Click Blueprint**: Supported via [`render.yaml`](render.yaml). Provisions the database and web service in a single click.
+  - **Auto Database URL Parser**: Directly accepts Render's internal `postgres://` `DATABASE_URL` format.
+  - **Auto Table Generation & Seed**: JPA initializes schema and default warden/student accounts on startup.
+  - **Memory Safeguards**: JVM container flags tuned for Render's 512MB RAM free tier.
+  - See full step-by-step instructions in **[RENDER_DEPLOYMENT_GUIDE.md](RENDER_DEPLOYMENT_GUIDE.md)**.
+* **Other Cloud Platforms**:
   - **Railway.app** (Automated Maven detection + Managed MySQL plugin)
-  - **Render.com** (Docker Web Service via included `Dockerfile`)
   - **Fly.io** (`fly launch` using the included `Dockerfile`)
-* Full deployment instructions and architecture notes are provided in [VERCEL_AND_DEPLOYMENT_GUIDE.md](VERCEL_AND_DEPLOYMENT_GUIDE.md).
+* Full architecture notes and Vercel serverless analysis are provided in [VERCEL_AND_DEPLOYMENT_GUIDE.md](VERCEL_AND_DEPLOYMENT_GUIDE.md).
 
 ---
 

@@ -1,39 +1,37 @@
 # ==============================================================================
 # Multi-Stage Dockerfile for Hostel Management System (Java 21 Spring Boot)
+# Optimized for Render Web Service + Render PostgreSQL
 # ==============================================================================
 
 # Stage 1: Build JAR using Maven & Eclipse Temurin JDK 21
-FROM eclipse-temurin:21-jdk-alpine AS builder
+FROM maven:3.9.9-eclipse-temurin-21-alpine AS builder
 WORKDIR /workspace
 
-# Copy Maven wrapper & POM
+# Copy POM and pre-fetch dependencies to optimize Docker caching
 COPY pom.xml .
-COPY mvnw .
-COPY mvnw.cmd .
+RUN mvn dependency:go-offline -B || true
 
-# Copy source code and build production package
+# Copy application source code and compile production package
 COPY src src
-RUN chmod +x ./mvnw || true
-RUN apk add --no-cache maven && mvn clean package -DskipTests
+RUN mvn clean package -DskipTests
 
-# Stage 2: Production JRE Runtime
+# Stage 2: Minimal Production JRE Runtime
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
-# Create non-root system user for security
+# Create secure non-root system user
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
 
-# Copy built artifact from builder
+# Copy built executable JAR from builder stage
 COPY --from=builder /workspace/target/*.jar app.jar
 
-# Expose standard application port
+# Expose standard application port (Render routes dynamic PORT automatically)
 EXPOSE 8080
 
-# Environment defaults (override in deployment environment)
-ENV SPRING_PROFILES_ACTIVE=mysql \
-    SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/hostel_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=true \
-    SPRING_DATASOURCE_USERNAME=root \
-    SPRING_DATASOURCE_PASSWORD=
+# Environment defaults (override in Render Environment settings)
+ENV SPRING_PROFILES_ACTIVE=postgres \
+    PORT=8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Execute Spring Boot with container-aware memory allocation (critical for Render 512MB RAM free tier)
+ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"]

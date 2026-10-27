@@ -1,21 +1,20 @@
 services:
-  # MySQL Database Service
-  mysql:
-    image: mysql:8.0
-    container_name: hostel_mysql
+  # PostgreSQL Database Service (Matches Render Managed PostgreSQL)
+  postgres:
+    image: postgres:16-alpine
+    container_name: hostel_postgres
     restart: always
     environment:
-      MYSQL_DATABASE: hostel_db
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_USER: hostel_user
-      MYSQL_PASSWORD: hostel_password
+      POSTGRES_DB: hostel_db
+      POSTGRES_USER: hostel_user
+      POSTGRES_PASSWORD: hostel_password
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
-      - ./src/main/resources/db/migration/schema-mysql.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/main/resources/db/migration/schema-postgres.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD-SHELL", "pg_isready -U hostel_user -d hostel_db"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -28,15 +27,16 @@ services:
     container_name: hostel_app
     restart: always
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
     environment:
-      SPRING_PROFILES_ACTIVE: mysql
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/hostel_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_PROFILES_ACTIVE: postgres
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hostel_db
       SPRING_DATASOURCE_USERNAME: hostel_user
       SPRING_DATASOURCE_PASSWORD: hostel_password
+      PORT: 8080
     ports:
       - "8080:8080"
 
 volumes:
-  mysql_data:
+  postgres_data:
